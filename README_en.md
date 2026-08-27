@@ -1,4 +1,4 @@
-# Real-Time Image AI Recognition via μT-Kernel 3.0 and NPU/GPU
+# Real-Time Image AI Recognition via μT-Kernel 3.0 and NPU/GPU (EK-RA8P1)
 
 This repository houses the development project for the TRON Programming Contest 2026, utilizing the Renesas **EK-RA8P1** evaluation board (Cortex-M85 / Arm Ethos-U55 NPU / Dave2D GPU) and the **μT-Kernel 3.0** real-time OS.
 It achieves an ultra-fast, flicker-free real-time display and deterministic control by running camera capture, GPU rendering, and AI inference completely in parallel.
@@ -135,12 +135,26 @@ Identifies and counts tiny electronic components (Pico, Xiao, nRF54L15) and IC c
   Validated Renesas RA8 specialized peripherals (Dave2D GPU, GLCDC LCD controller, and MIPI-CSI2 camera interface) under μT-Kernel 3.0 task management to construct a robust hardware integration baseline.
 - **Key Code Implementation Points**:
   - Implemented a secure **Triple-Buffering Rotation** (`draw_buf`, `pending_buf`, and `display_buf`) inside `usermain.cpp`. Using GLCDC callbacks and `tk_slp_tsk`/`tk_wup_tsk` wakes up the drawing task synchronously at 16.6 ms intervals, securing screen synchronization without tearing.
+    
+    | LCD Triple-Buffer Verification (1) | LCD Triple-Buffer Verification (2) |
+    | :---: | :---: |
+    | ![tron_lcd_d1](img/tron_lcd_d1.png) | ![tron_lcd_d3](img/tron_lcd_d3.png) |
+    
   - Offloaded camera image scaling (320x240 RGB565 to 800x600) to the D/AVE 2D GPU via bilinear interpolation commands, keeping CPU load near zero.
+    
+    | Scaled Camera Stream (1) | Scaled Camera Stream (2) |
+    | :---: | :---: |
+    | ![tron_mipi_2](img/tron_mipi_2.png) | ![tron_mipi_3](img/tron_mipi_3.png) |
 
 ### 2. Image Classification (MobileNet V1)
 * **Target Folders**: [tron_img_cpu](src/tron_img_cpu) / [tron_img_npu](src/tron_img_npu)
 - **Overview**:
   Hosted the TensorFlow Lite Micro engine inside a μT-Kernel 3.0 task to run real-time MobileNet V1-based object classification on live camera streams.
+  
+  | Image Classification (1) | Image Classification (2) |
+  | :---: | :---: |
+  | ![tron_img7](img/tron_img7.png) | ![tron_img8](img/tron_img8.png) |
+  
 - **Key Code Implementation Points**:
   - Optimized camera RGB565 frame conversions to the 224x224 RGB888 format expected by the model.
   - Integrated NPU driver initialization (`RM_ETHOSU_Open`) and coupled it with strict D-Cache maintenance operations (`SCB_CleanDCache_by_Addr` and `SCB_InvalidateDCache_by_Addr`) to prevent CPU-NPU data mismatch under Cortex-M85 caching.
@@ -149,12 +163,22 @@ Identifies and counts tiny electronic components (Pico, Xiao, nRF54L15) and IC c
 * **Target Folders**: [tron_yolo_face_cpu](src/tron_yolo_face_cpu) / [tron_yolo_face_npu](src/tron_yolo_face_npu)
 - **Overview**:
   Offloaded the YOLO-based object detection model (which takes ~2,090 ms on the CPU) to the Ethos-U55 NPU, squeezing latency down to **16 ms** and securing fluid face bounding-box overlays on the 60 Hz display.
+  
+  | YOLO Face Detection (1) | YOLO Face Detection (2) |
+  | :---: | :---: |
+  | ![tron_face6](img/tron_face6.png) | ![tron_face7](img/tron_face7.png) |
+  
 - **Key Code Implementation Points**:
   - Implemented an **asynchronous frame-skipping pipeline** governed by a state flag (`g_ai_task_busy`) to separate the 60 Hz display loop (`task_ui`) from the variable-rate AI task (`task_ai` / Priority 11).
   - Optimized the inverse quantization and coordinate mapping post-process (`yolo_face_postprocess`) to map the int8 quantization outputs back to physical display pixels quickly.
 
 ### 4. PCB Component Detection (FOMO)
 * **Target Folders**: [tron_edge_fomo_cpu_type](src/tron_edge_fomo_cpu_type) / [tron_edge_fomo_npu_type](src/tron_edge_fomo_npu_type) / [tron_edge_fomo_ic](src/tron_edge_fomo_ic)
+  
+  | FOMO Component Detection (1) | FOMO Component Detection (2) |
+  | :---: | :---: |
+  | ![tron_fomo5](img/tron_fomo5.png) | ![tron_fomo6](img/tron_fomo6.png) |
+  
 - **Overview**:
   Validated the Edge Impulse FOMO model on the Ethos-U55 NPU to identify and count tiny components (Pico, Xiao, nRF54L15) and IC chips on PCBs in real-time.
 - **Key Code Implementation Points**:

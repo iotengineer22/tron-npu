@@ -1,4 +1,4 @@
-# μT-Kernel 3.0とNPU/GPUによるリアルタイム画像AI認識
+# μT-Kernel 3.0とNPU/GPUによるリアルタイム画像AI認識 (EK-RA8P1)
 
 本リポジトリは、ルネサスエレクトロニクス製マイコン **EK-RA8P1**（Cortex-M85 / Ethos-U55 NPU / Dave2D GPU 搭載）とリアルタイムOS **μT-Kernel 3.0** を用いた、TRONプログラミングコンテスト2026応募用の開発プロジェクトです。
 カメラ入力・画像描画・AI推論を完全に並列化することで、超高速かつチラつきのない表示とリアルタイム制御を実現しています。
@@ -74,7 +74,7 @@
 ## 4. 収録プログラム一覧 (src 配下)
 
 ### 4-1. ファームウェア (基礎ペリフェラル・RTOS検証)
-RTOSマルチタスクの基本スケジューリング、シリアル出力、I2C接続、Dave2Dによる基本描画、カメラと液晶パネル의 ダイレクト接続テストを検証した、システムの土台となるプログラム群です。
+RTOSマルチタスクの基本スケジューリング、シリアル出力、I2C接続、Dave2Dによる基本描画、カメラと液晶パネルのダイレクト接続テストを検証した、システムの土台となるプログラム群です。
 
 | フォルダ名 | アプリケーションの役割 | 使用エンジン (AI / 描画) |
 | :--- | :--- | :--- |
@@ -135,12 +135,26 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
   マイコン内蔵の2D GPU（Dave2D）やGLCDC（液晶表示コントローラ）、MIPI-CSI2カメラモジュールといった高度な周辺機能を μT-Kernel 3.0 上で動作検証し、基盤となる協調表示機構を構築。
 - **コードにおける重要ポイント**:
   - `draw_buf`, `pending_buf`, `display_buf` の3つを用意する**トリプルバッファローテーション制御**を `usermain.cpp` に実装。GLCDCのスキャンアウト割り込みをフックし、`tk_slp_tsk` / `tk_wup_tsk` を介した同期起床スリープにより、16.6msごとのVblank期間内での完全同期切り替えを実現。
+    
+    | LCDトリプルバッファ検証(1) | LCDトリプルバッファ検証(2) |
+    | :---: | :---: |
+    | ![tron_lcd_d1](img/tron_lcd_d1.png) | ![tron_lcd_d3](img/tron_lcd_d3.png) |
+    
   - D/AVE 2Dによるバイリニア（双線形）補間拡大コピー命令をドライバ経由でGPUへオフロードし、320x240のカメラ入力をCPU負荷ほぼゼロで 800x600 へ拡大描画。
+    
+    | カメラ表示(1) | カメラ表示(2) |
+    | :---: | :---: |
+    | ![tron_mipi_2](img/tron_mipi_2.png) | ![tron_mipi_3](img/tron_mipi_3.png) |
 
 ### 2. 画像分類（MobileNet V1）
 * **対象フォルダ**: [tron_img_cpu](src/tron_img_cpu) / [tron_img_npu](src/tron_img_npu)
 - **技術概要**:
   TensorFlow Lite Micro (TFLite Micro) を μT-Kernel 3.0 タスクとして実行させ、MobileNet V1 モデルを用いた実世界物体のリアルタイム分類を実現。
+  
+  | 画像分類(1) | 画像分類(2) |
+  | :---: | :---: |
+  | ![tron_img7](img/tron_img7.png) | ![tron_img8](img/tron_img8.png) |
+  
 - **コードにおける重要ポイント**:
   - `image_rgb565_to_rgb888` によるカメラ画像から推論用（224x224 RGB888）データへのCPUによる高速フォーマット変換コード。
   - TFLite Micro の推論エンジンをバックグラウンドNPU（Ethos-U55）に接続するための、`RM_ETHOSU_Open` によるNPUドライバ初期化処理と、キャッシュ同期のための DCache Invalidate/Clean 命令の厳密な呼び出しタイミング制御。
@@ -149,12 +163,22 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 * **対象フォルダ**: [tron_yolo_face_cpu](src/tron_yolo_face_cpu) / [tron_yolo_face_npu](src/tron_yolo_face_npu)
 - **技術概要**:
   Cortex-M85 CPU のみでは推論に約2.09秒を要していた YOLO モデルを、Ethos-U55 NPUアクセラレータ上での実行へと移行。推論時間をミリ秒オーダー（約16ms）へ圧縮し、1秒間に60回描画を崩さず実機上で非同期に顔枠の座標追従を行うことに成功。
+  
+  | YOLO顔検出(1) | YOLO顔検出(2) |
+  | :---: | :---: |
+  | ![tron_face6](img/tron_face6.png) | ![tron_face7](img/tron_face7.png) |
+  
 - **コードにおける重要ポイント**:
   - `task_ui` (描画・カメラ) と `task_ai` (推論・優先度11) を非同期かつ安全にオーバーラップさせるための、排他制御変数 `g_ai_task_busy` による**AI推論自動フレームスキップ機構**。
   - 推論完了時に得られる量子化されたバウンディングボックス座標（`int8` 型）を実画面上のピクセル座標に逆量子化するポストプロセス関数（`yolo_face_postprocess`）の最適化。
 
 ### 4. PCB部品検出 (FOMO)
 * **対象フォルダ**: [tron_edge_fomo_cpu_type](src/tron_edge_fomo_cpu_type) / [tron_edge_fomo_npu_type](src/tron_edge_fomo_npu_type) / [tron_edge_fomo_ic](src/tron_edge_fomo_ic)
+  
+  | FOMO部品検出(1) | FOMO部品検出(2) |
+  | :---: | :---: |
+  | ![tron_fomo5](img/tron_fomo5.png) | ![tron_fomo6](img/tron_fomo6.png) |
+  
 - **技術概要**:
   基板上の極小のチップ部品やICなどの複数オブジェクトをリアルタイムに同時識別し、その数と位置を検出する Edge Impulse FOMO モデルを Ethos-U55 NPU 上で動作検証。
 - **コードにおける重要ポイント**:
