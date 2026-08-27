@@ -137,6 +137,8 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 #### 1-1. Parallel UART Printing Verification ([tron_serial_test](src/tron_serial_test))
 * **Overview**:
   Validates concurrent UART serial printing using T-Monitor API from two separate tasks running under the μT-Kernel 3.0 priority scheduling scheduler.
+  
+  ![μT-Kernel 3.0 Multitasking Layout Diagram](img/task_architecture.png)
 * **Key Code Implementation Points**:
   OS headers are wrapped in `extern "C"` linkage blocks to prevent compilation symbol resolution issues when compiling with C++. Task creation is performed by specifying properties inside the `T_CTSK` structure.
   ```cpp
@@ -170,6 +172,10 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 #### 1-2. Camera I2C Connection Test ([tron_i2c_test](src/tron_i2c_test))
 * **Overview**:
   Tests camera hardware reset, provides 24MHz clock (XCLK), and queries the camera module (OV5640) registers via I2C to verify communication.
+  
+  | I2C Camera Diagnostic (1) | I2C Camera Diagnostic (2) |
+  | :---: | :---: |
+  | ![tron_i2c3](img/tron_i2c3.png) | ![tron_i2c4](img/tron_i2c4.png) |
 * **Key Code Implementation Points**:
   Since I2C writes/reads are asynchronous, we implement a polling-based callback wait (`wait_i2c_event`) using a volatile callback flag `i2c_event` received from the I2C event interrupt handler `g_cam_i2c_master_user_callback`.
   ```cpp
@@ -274,7 +280,9 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 ### 2. Image Classification (MobileNet V1)
 * **Target Folders**: [tron_img_cpu](src/tron_img_cpu) / [tron_img_npu](src/tron_img_npu)
 - **Overview**:
-  Hosted the TensorFlow Lite Micro engine inside a μT-Kernel 3.0 task to run real-time MobileNet V1-based object classification on live camera streams.
+  Hosted the TensorFlow Lite Micro engine inside a μT-Kernel 3.0 task to run real-time MobileNet V1-based object classification on live camera streams, accelerated via the Ethos-U55 NPU.
+  
+  ![AI GPU/NPU Cooperative Pipeline Sequence Diagram](img/parallel_pipeline_architecture.png)
 - **Key Code Implementation Points**:
   - Optimized camera RGB565 frame conversions to the 224x224 RGB888 format expected by the model.
   - Integrated NPU driver initialization (`RM_ETHOSU_Open`) and coupled it with strict D-Cache maintenance operations (`SCB_CleanDCache_by_Addr` and `SCB_InvalidateDCache_by_Addr`) to prevent CPU-NPU data mismatch under Cortex-M85 caching.
@@ -312,6 +320,8 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 * **Target Folders**: [tron_yolo_face_cpu](src/tron_yolo_face_cpu) / [tron_yolo_face_npu](src/tron_yolo_face_npu)
 - **Overview**:
   Offloaded the YOLO-based object detection model (which takes ~2,090 ms on the CPU) to the Ethos-U55 NPU, squeezing latency down to **16 ms** and securing fluid face bounding-box overlays on the 60 Hz display.
+  
+  ![Asynchronous Frame-Skip Multi-Task Dataflow](img/sensor_parallel_architecture.png)
 - **Key Code Implementation Points**:
   - Implemented an **asynchronous frame-skipping pipeline** governed by a state flag (`g_ai_task_busy`) to separate the 60 Hz display loop (`task_ui`) from the variable-rate AI task (`task_ai` / Priority 11).
   - Optimized the inverse quantization and coordinate mapping post-process (`yolo_face_postprocess`) to map the int8 quantization outputs back to physical display pixels quickly.
@@ -352,6 +362,8 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 * **Target Folders**: [tron_edge_fomo_cpu_type](src/tron_edge_fomo_cpu_type) / [tron_edge_fomo_npu_type](src/tron_edge_fomo_npu_type) / [tron_edge_fomo_ic](src/tron_edge_fomo_ic)
 - **Overview**:
   Validated the Edge Impulse FOMO model on the Ethos-U55 NPU to identify and count tiny components (Pico, Xiao, nRF54L15) and IC chips on PCBs in real-time.
+  
+  ![CPU vs NPU Edge AI Model Acceleration Comparison Graph](img/cpu_vs_npu_comparison.png)
 - **Key Code Implementation Points**:
   - Developed a fast post-processor (`fomo_postprocess`) that parses the grid-cell output tensors to extract and label coordinates of multiple components.
   - Strictly aligned the tensor arena in SRAM/SDRAM to the Cortex-M85 32-byte cache line limit via `BSP_ALIGN_VARIABLE(32)`, preventing neighboring memory blocks from getting corrupted during cache invalidations.
