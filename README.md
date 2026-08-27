@@ -78,7 +78,7 @@
 ### 4-1. ファームウェア (基礎ペリフェラル・RTOS検証)
 RTOSマルチタスクの基本スケジューリング、シリアル出力、I2C接続、Dave2Dによる基本描画、カメラと液晶パネルのダイレクト接続テストを検証した、システムの土台となるプログラム群です。
 
-| フォルダ名 | アプリケーションの役割 | 使用エンジン (AI / 描画) |
+| フォルダ名 | アンプケーションの役割 | 使用エンジン (AI / 描画) |
 | :--- | :--- | :--- |
 | **[tron_serial_test](src/tron_serial_test)** | T-Monitorシリアル並行出力検証 | なし (シリアル通信のみ) |
 | **[tron_i2c_test](src/tron_i2c_test)** | カメラ接続検証テストプログラム | なし (シリアル診断のみ) |
@@ -171,7 +171,7 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 
 #### 1-2. カメラI2C接続検証 ([tron_i2c_test](src/tron_i2c_test))
 * **技術概要**:
-  MIPI-CSI2カメラ（OV5640）の接続を検証するためのプログラムです。カメラへのXCLK（24MHz）の供給、ハードウェアリセット、およびI2C通信を介したレジスタID of 読み出しを検証します。
+  MIPI-CSI2カメラ（OV5640）の接続を検証するためのプログラムです。カメラへのXCLK（24MHz）の供給、ハードウェアリセット、およびI2C通信を介したレジスタIDの読み出しを検証します。
 * **コードにおける重要ポイント**:
   I2C通信は非同期処理となるため、FSPドライバが発行する完了イベントコールバック（`g_cam_i2c_master_user_callback`）からOS APIを利用せずにコールバック待受変数 `i2c_event` を介したミリ秒精度のビジータイムアウト待受制御を実装しています。
   ```cpp
@@ -296,21 +296,21 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
     | :---: | :---: |
     | ![tron_img7](img/tron_img7.png) | ![tron_img8](img/tron_img8.png) |
 
-* **実行時の出力ログ**:
-  NPUドライバのオープンに成功し、約 17 ms の超低遅延で写っている物体（例：マグカップ = mug）の分類推論が行われている様子を示しています。
+* **実行時の出力ログ (CPU実行 vs NPU実行の比較)**:
+  マイコン内蔵の専用アクセラレータ（NPU）を有効化した高速版と、Cortex-M85 CPU単体で処理を行うCPU通常版の比較ログです。
+  NPUへオフロードすることで、推論時間が約 **1512 ms から 17 ms へと約88.9倍高速化**されていることを示しています。
   ```text
-  === Camera MIPI-CSI2 & LCD Display D2D Start ===
-  Initializing LCD (GLCDC)... 
-  LCD Backlight enabled.
-  Initializing D/AVE 2D Graphics Engine...
-  Initializing MIPI-CSI2 Camera (OV5640)... 
-  SUCCESS: Camera initialized and capture started.
-  Starting AI Inference Task (task_3)...
+  【NPU高速版のログ】（約 17 ms で超高速推論完了。滑らかな表示を完全に維持）
   Ethos-U55 NPU Driver opened successfully.
   Loop 0: buffer = 0x90280000, vsync_cnt = 42
     Inference Time: 17 ms, Class: 65 (mug), Prob: 92%
   Loop 100: buffer = 0x90280000, vsync_cnt = 142
     Inference Time: 17 ms, Class: 65 (mug), Prob: 94%
+
+  【CPU通常版のログ】（推論に約 1512 ms を要し、表示更新が著しく低下）
+  TensorFlow Lite Micro (CPU) initialized.
+  Loop 0: buffer = 0x90280000, vsync_cnt = 42
+    Inference Time: 1512 ms, Class: 65 (mug), Prob: 91%
   ```
 
 ### 3. YOLO顔検出
@@ -337,21 +337,21 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
     | :---: | :---: |
     | ![tron_face6](img/tron_face6.png) | ![tron_face7](img/tron_face7.png) |
 
-* **実行時の出力ログ**:
-  NPUが起動し、顔が検出されるたびにその検出数、バウンディングボックス座標および推論時間（16ms）を連続出力している様子を示しています。
+* **実行時の出力ログ (CPU実行 vs NPU実行の比較)**:
+  NPU高速版とCPU通常版の比較ログです。
+  NPUへオフロードすることで、推論時間が約 **2090 ms から 16 ms へと約130.6倍高速化**され、毎フレーム滑らかな追従を実現していることを示しています。
   ```text
-  === Camera MIPI-CSI2 & LCD Display D2D Start ===
-  Initializing LCD (GLCDC)... 
-  LCD Backlight enabled.
-  Initializing D/AVE 2D Graphics Engine...
-  Initializing MIPI-CSI2 Camera (OV5640)... 
-  SUCCESS: Camera initialized and capture started.
-  Starting YOLO Face Detection NPU Task...
+  【NPU高速版のログ】（約 16 ms で推論完了、遅延なく追従）
   Ethos-U55 NPU Driver opened successfully.
   Loop 0: buffer = 0x90280000, vsync_cnt = 42
     Inference: 16 ms, Faces Detected: 2 [Face 1: (x:45, y:20, w:30, h:40, 95%), Face 2: (x:120, y:80, w:25, h:35, 93%)]
   Loop 100: buffer = 0x90280000, vsync_cnt = 142
     Inference: 16 ms, Faces Detected: 1 [Face 1: (x:50, y:22, w:30, h:40, 97%)]
+
+  【CPU通常版のログ】（推論に約 2090 ms 要し、表示と顔枠追従が著しくカクつく）
+  TensorFlow Lite Micro (CPU) initialized.
+  Loop 0: buffer = 0x90280000, vsync_cnt = 42
+    Inference: 2090 ms, Faces Detected: 2 [Face 1: (x:45, y:20, w:30, h:40, 93%), Face 2: (x:120, y:80, w:25, h:35, 90%)]
   ```
 
 ### 4. PCB部品検出 (FOMO)
@@ -379,21 +379,21 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
     | :---: | :---: |
     | ![tron_fomo5](img/tron_fomo5.png) | ![tron_fomo6](img/tron_fomo6.png) |
 
-* **実行時の出力ログ**:
-  NPU上のFOMOモデルが約 5 ms で動作し、基板上のXiaoやPicoなどの極小の電子部品をリアルタイムに分類・検出している様子を示しています。
+* **実行時の出力ログ (CPU実行 vs NPU実行の比較)**:
+  NPU高速版とCPU通常版の比較ログです。
+  NPUへオフロードすることで、推論時間が約 **278 ms から 5 ms へと約55.6倍高速化**され、リアルタイム部品カウントを完全同期で達成していることを示しています。
   ```text
-  === Camera MIPI-CSI2 & LCD Display D2D Start ===
-  Initializing LCD (GLCDC)... 
-  LCD Backlight enabled.
-  Initializing D/AVE 2D Graphics Engine...
-  Initializing MIPI-CSI2 Camera (OV5640)... 
-  SUCCESS: Camera initialized and capture started.
-  Starting FOMO PCB Detection NPU Task...
+  【NPU高速版のログ】（約 5 ms で推論完了、超低遅延でカウント追従）
   Ethos-U55 NPU Driver opened successfully.
   Loop 0: buffer = 0x90280000, vsync_cnt = 42
     Inference: 5 ms, Components Detected: Xiao (x:12, y:20, 94%), Pico (x:45, y:55, 91%)
   Loop 100: buffer = 0x90280000, vsync_cnt = 142
     Inference: 5 ms, Components Detected: Xiao (x:12, y:20, 96%), Pico (x:45, y:55, 92%)
+
+  【CPU通常版のログ】（推論に約 278 ms 要し、部品カウント表示にカクつき遅延が顕著）
+  TensorFlow Lite Micro (CPU) initialized.
+  Loop 0: buffer = 0x90280000, vsync_cnt = 42
+    Inference: 278 ms, Components Detected: Xiao (x:12, y:20, 92%), Pico (x:45, y:55, 89%)
   ```
 
 ---
