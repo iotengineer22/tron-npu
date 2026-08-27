@@ -1,6 +1,6 @@
 # Real-Time Image AI Recognition via μT-Kernel 3.0 and NPU/GPU
 
-This repository houses the development project for the TRON Programming Contest 2026, utilizing the Renesas **EK-RA8P1** evaluation board (Cortex-M85 / 480MHz / Arm Ethos-U55 NPU) and the **μT-Kernel 3.0** real-time OS.
+This repository houses the development project for the TRON Programming Contest 2026, utilizing the Renesas **EK-RA8P1** evaluation board (Cortex-M85 / 480MHz / Arm Ethos-U55 NPU and Dave2D GPU) and the **μT-Kernel 3.0** real-time OS.
 It achieves an ultra-fast, flicker-free real-time display and deterministic control by running camera capture, GPU rendering, and AI inference completely in parallel.
 
 ---
