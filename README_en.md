@@ -36,7 +36,7 @@ This project combines μT-Kernel 3.0's priority-based multi-task scheduling with
 
 ## 3. System Architecture
 
-### μT-Kernel 3.0 Multi-Task Scheduling (Parallel Pipeline)
+### 3-1. μT-Kernel 3.0 Multi-Task Scheduling (Parallel Pipeline)
 The system divides its workload into two separate tasks running concurrently on the RTOS:
 
 ![μT-Kernel 3.0 Multi-Tasking & Dataflow Diagram](img/task_architecture.png)
@@ -46,7 +46,7 @@ The system divides its workload into two separate tasks running concurrently on 
 * **AI Inference Task (`task_ai` / Priority 11)**: 
   Manages preprocessing and runs model inference via the Arm Ethos-U55 NPU driver.
 
-### Dave2D GPU & Ethos-U55 NPU Cooperative Sequence
+### 3-2. Dave2D GPU & Ethos-U55 NPU Cooperative Sequence
 To drive heavy AI inferences in the background without affecting the 60 Hz display refresh rate, the system coordinates the on-chip 2D GPU (Dave2D) and NPU using the following parallel pipeline:
 
 ![Parallel Pipeline Sequence Diagram](img/parallel_pipeline_architecture.png)
@@ -59,7 +59,7 @@ To drive heavy AI inferences in the background without affecting the 60 Hz displ
 
 This pipeline eliminates screen tearing and keeps the CPU free for other processes, yielding a smooth 60 Hz display alongside ultra-low latency AI detection.
 
-### AI Inference Acceleration: CPU to NPU (Real-Time & Deterministic Control)
+### 3-3. AI Inference Acceleration: CPU to NPU (Real-Time & Deterministic Control)
 To objectively evaluate the processing capability of the NPU, **we developed and compiled alternative "CPU versions" of each application (running TFLite Micro strictly on the Cortex-M85 CPU without NPU acceleration) and conducted detailed benchmark measurements on the actual target board.**
 
 The benchmarks demonstrate that offloading heavy AI inference to the dedicated on-chip NPU accelerator achieves dramatic performance improvements compared to CPU-only execution. By outsourcing inference to the NPU, CPU utilization drops near zero, enabling the RTOS task scheduler to maintain strict, deterministic real-time control without display jitter.
