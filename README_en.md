@@ -132,21 +132,144 @@ Identifies and counts tiny electronic components (Pico, Xiao, nRF54L15) and IC c
 ## 5. Sub-Project Key Implementations & Technical Points
 
 ### 1. Firmware Layer (Peripheral & RTOS Integration)
-* **Target Folders**: [tron_d2_test](src/tron_d2_test) / [tron_mipi_test_ori](src/tron_mipi_test_ori)
-- **Overview**:
-  Validated Renesas RA8 specialized peripherals (Dave2D GPU, GLCDC LCD controller, and MIPI-CSI2 camera interface) under μT-Kernel 3.0 task management to construct a robust hardware integration baseline.
-- **Key Code Implementation Points**:
-  - Implemented a secure **Triple-Buffering Rotation** (`draw_buf`, `pending_buf`, and `display_buf`) inside `usermain.cpp`. Using GLCDC callbacks and `tk_slp_tsk`/`tk_wup_tsk` wakes up the drawing task synchronously at 16.6 ms intervals, securing screen synchronization without tearing.
-    
+These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-CSI2 camera, and GLCDC screen flips) under μT-Kernel 3.0 task execution.
+
+#### 1-1. Parallel UART Printing Verification ([tron_serial_test](src/tron_serial_test))
+* **Overview**:
+  Validates concurrent UART serial printing using T-Monitor API from two separate tasks running under the μT-Kernel 3.0 priority scheduling scheduler.
+* **Key Code Implementation Points**:
+  OS headers are wrapped in `extern "C"` linkage blocks to prevent compilation symbol resolution issues when compiling with C++. Task creation is performed by specifying properties inside the `T_CTSK` structure.
+  ```cpp
+  extern "C" {
+  #include <tk/tkernel.h>
+  #include <tm/tmonitor.h>
+  }
+
+  LOCAL T_CTSK ctsk_1 = {
+      .exinf   = NULL,
+      .tskatr  = TA_HLNG | TA_RNG3,
+      .task    = (FP)task_1,
+      .itskpri = 10,
+      .stksz   = 1024,
+      .bufptr  = NULL
+  };
+  ```
+* **Serial Print Log**:
+  Shows that task 1 and task 2 run independently with their respective periods (500ms and 700ms) without interfering with each other:
+  ```text
+  Start User-main program.
+  task 1
+  task 2
+  task 1
+  task 2
+  task 1
+  task 1
+  task 2
+  ```
+
+#### 1-2. Camera I2C Connection Test ([tron_i2c_test](src/tron_i2c_test))
+* **Overview**:
+  Tests camera hardware reset, provides 24MHz clock (XCLK), and queries the camera module (OV5640) registers via I2C to verify communication.
+* **Key Code Implementation Points**:
+  Since I2C writes/reads are asynchronous, we implement a polling-based callback wait (`wait_i2c_event`) using a volatile callback flag `i2c_event` received from the I2C event interrupt handler `g_cam_i2c_master_user_callback`.
+  ```cpp
+  static bool rdSensorReg16_8(uint16_t regID, uint8_t *regDat)
+  {
+      fsp_err_t err;
+      uint8_t data[2] = {(uint8_t)(regID >> 8), (uint8_t)regID};
+      
+      i2c_event = (i2c_master_event_t)0;
+      err = R_IIC_MASTER_Write(&g_cam_i2c_master_ctrl, data, 2, true);
+      if (FSP_SUCCESS == err) {
+          err = wait_i2c_event();
+      }
+      ...
+  }
+  ```
+* **Serial Print Log**:
+  Confirming the successful query of OV5640's unique Product ID High/Low registers returning `0x56` and `0x40`:
+  ```text
+  Start User-main program (Camera Connection Test).
+
+  === Camera I2C Connection Test Start ===
+  Resetting Camera (CAMERA_RESET -> P709)...
+  Starting GPT Clock for Camera XCLK (g_cam_clk)...
+  Opening I2C Master (g_cam_i2c_master)...
+  Reading OV5640 Product ID registers via I2C...
+  Product ID Read: H = 0x56, L = 0x40
+  SUCCESS: Camera connection verified! (OV5640 detected)
+  ```
+
+#### 1-3. LCD GLCDC and SDRAM Verification ([tron_d2_test](src/tron_d2_test))
+* **Overview**:
+  Validates 2D graphics hardware engine (Dave2D) drawing features, implements screen buffering, and runs physical write/read memory self-tests on the external SDRAM space.
+* **Key Code Implementation Points**:
+  Achieves a tear-free 60 Hz layout by running a Triple-Buffering rotation (`draw_buf`, `pending_buf`, `display_buf`). The drawing task blocks on `tk_slp_tsk` and is woke up at the vertical blanking edge by `tk_wup_tsk(tskid_1)` within the GLCDC Vblank callback.
+  Ensures memory consistency against DMA transactions by performing clean cache calls (`SCB_CleanInvalidateDCache`) between CPU edits and GPU flushes.
+  ```cpp
+  extern "C" void lcd_glcdc_callback(display_callback_args_t * p_args)
+  {
+      if (p_args->event == DISPLAY_EVENT_LINE_DETECTION)
+      {
+          vblank_flag = true;
+          tk_wup_tsk(tskid_1); // Wake drawing task at Vblank interrupt
+      }
+  }
+  ```
+
     | LCD Triple-Buffer Verification (1) | LCD Triple-Buffer Verification (2) |
     | :---: | :---: |
     | ![tron_lcd_d1](img/tron_lcd_d1.png) | ![tron_lcd_d3](img/tron_lcd_d3.png) |
-    
-  - Offloaded camera image scaling (320x240 RGB565 to 800x600) to the D/AVE 2D GPU via bilinear interpolation commands, keeping CPU load near zero.
-    
+
+* **Serial Print Log**:
+  Displays successful SDRAM test results and records the rendering loop flinging bouncing balls aligned with GLCDC refresh ticks:
+  ```text
+  Start User-main program (Camera & LCD D2D Test).
+  Testing physical SDRAM at address 0x90000000...
+  SDRAM verification SUCCESS!
+  Clearing SDRAM framebuffers to black...
+  Initializing LCD (GLCDC)... 
+  LCD Backlight enabled.
+  Initializing D/AVE 2D Graphics Engine...
+  Starting D/AVE 2D Rendering Loop (SDRAM Triple Buffer Bouncing Ball)...
+  Loop 0: rendering bouncing ball... (Vblank IRQs: 42)
+  Loop 100: rendering bouncing ball... (Vblank IRQs: 142)
+  ```
+
+#### 1-4. Integrated MIPI-CSI2 Live Camera Display ([tron_mipi_test_ori](src/tron_mipi_test_ori))
+* **Overview**:
+  Integrates MIPI-CSI2 camera acquisition, bilinear graphics scaling via Dave2D GPU, and screen flips on the GLCDC display to drive real-time live video streams without tearing.
+* **Key Code Implementation Points**:
+  Instructs the Dave2D GPU to treat the camera capture output `p_camera_capture_buffer_stored` as the source texture. bilinear interpolation scaling (`d2_tm_filter`) is applied using the hardware-accelerated `d2_blitcopy` command.
+  ```cpp
+  d2_setblitsrc(d2_handle, (void *)p_camera_capture_buffer_stored, 320, 320, 240, d2_mode_rgb565);
+  d2_blitcopy(d2_handle,
+              320, 240,
+              0, 0,
+              800 << 4, 600 << 4,  // scaled width & height
+              112 << 4, 0 << 4,    // centered screen offsets
+              d2_tm_filter);       // bilinear interpolation filter
+  ```
+
     | Scaled Camera Stream (1) | Scaled Camera Stream (2) |
     | :---: | :---: |
     | ![tron_mipi_2](img/tron_mipi_2.png) | ![tron_mipi_3](img/tron_mipi_3.png) |
+
+* **Serial Print Log**:
+  Indicates camera setup starting capture and looping successfully, querying captured camera frame buffer addresses:
+  ```text
+  === Camera MIPI-CSI2 & LCD Display D2D Start ===
+  Initializing LCD (GLCDC)... 
+  LCD Backlight enabled.
+  Initializing D/AVE 2D Graphics Engine...
+  Initializing MIPI-CSI2 Camera (OV5640)... 
+  SUCCESS: Camera initialized and capture started.
+  Entering Real-time Camera Display Loop...
+  Loop 0: buffer = 0x90280000, vsync_cnt = 42
+    Buf Data: 0xF800 0xF800 0xF800 0xF800 0xF800 0xF800 0xF800 0xF800
+  Loop 100: buffer = 0x90280000, vsync_cnt = 142
+    Buf Data: 0x4B20 0x4B20 0x4B40 0x4B60 0x4B60 0x4B60 0x4B40 0x4B20
+  ```
 
 ### 2. Image Classification (MobileNet V1)
 * **Target Folders**: [tron_img_cpu](src/tron_img_cpu) / [tron_img_npu](src/tron_img_npu)

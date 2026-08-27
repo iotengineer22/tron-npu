@@ -14,7 +14,7 @@
 本システムは、MIPI-CSI2カメラ（OV5640）からリアルタイムに入力される動画像に対して、物体検出（YOLO-Fastest、FOMO）および画像分類（MobileNet V1）などの深層学習モデルによる推論を実行し、ディスプレイ（1024x600 TFT）へリアルタイムに結果を重ね描きして出力するスマートエッジデバイス・アプリケーションです。
 
 ### 「TRON×AI」の親和性
-組み込みAIにおける最大の課題は、AI推論（重い行列演算）がCPUパワーを長時間占有してしまい、画面表示 of ガクつき（ジッタ）や、センサー監視の取りこぼしを引き起こす点にあります。
+組み込みAIにおける最大の課題は、AI推論（重い行列演算）がCPUパワーを長時間占有してしまい、画面表示のガクつき（ジッタ）や、センサー監視の取りこぼしを引き起こす点にあります。
 本システムでは、μT-Kernel 3.0 の優先度ベースのマルチタスクスケジューリングと、独立した専用アクセラレータ（NPU/GPU）を組み合わせることで、**「UI/カメラ表示の応答性（60Hz）の完全維持」** と **「推論のバックグラウンド実行（数ms〜数十ms）」** の両立を可能とし、極めて実用的で低遅延なリアルタイムAIエッジアプリケーションを実証しました。
 
 ---
@@ -132,21 +132,149 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 ## 5. 各プログラムのキーポイントと技術的アピール
 
 ### 1. ファームウェア層（基礎ペリフェラル・RTOS検証）
-* **対象フォルダ**: [tron_d2_test](src/tron_d2_test) / [tron_mipi_test_ori](src/tron_mipi_test_ori)
-- **技術概要**:
-  マイコン内蔵の2D GPU（Dave2D）やGLCDC（液晶表示コントローラ）、MIPI-CSI2カメラモジュールといった高度な周辺機能を μT-Kernel 3.0 上で動作検証し、基盤となる協調表示機構を構築。
-- **コードにおける重要ポイント**:
-  - `draw_buf`, `pending_buf`, `display_buf` の3つを用意する**トリプルバッファローテーション制御**を `usermain.cpp` に実装。GLCDCのスキャンアウト割り込みをフックし、`tk_slp_tsk` / `tk_wup_tsk` を介した同期起床スリープにより、16.6msごとのVblank期間内での完全同期切り替えを実現。
-    
+システム全体の土台となる基礎機能について、μT-Kernel 3.0 タスクとハードウェア周辺機能を接続するための検証プロジェクト群です。
+
+#### 1-1. T-Monitorシリアル並行出力検証 ([tron_serial_test](src/tron_serial_test))
+* **技術概要**:
+  μT-Kernel 3.0 の優先度ベースのマルチタスクスケジューリング環境下において、2つのタスクから同時にT-Monitor APIを介してデバッグ用シリアル通信（UART）へ出力を行った際の並行動作を検証します。
+* **コードにおける重要ポイント**:
+  C++コードからOS（μT-Kernel）のC関数群を正しく呼び出すため、`extern "C"` を用いたリンケージ記述を適用しています。また、`T_CTSK` 構造体によりスタックサイズやタスク起動関数等の属性を明示的に初期化してタスク登録を行います。
+  ```cpp
+  // extern "C" リンケージを用いてOSヘッダをロード
+  extern "C" {
+  #include <tk/tkernel.h>
+  #include <tm/tmonitor.h>
+  }
+
+  // タスク属性構造体の定義
+  LOCAL T_CTSK ctsk_1 = {
+      .exinf   = NULL,
+      .tskatr  = TA_HLNG | TA_RNG3,
+      .task    = (FP)task_1,
+      .itskpri = 10,
+      .stksz   = 1024,
+      .bufptr  = NULL
+  };
+  ```
+* **実行時の出力ログ**:
+  `usermain` から2つのタスクが生成され、OSのスケジューラにより指定された周期ウェイト（500ms / 700ms）に従い、シリアルポートへ競合することなくログを並行出力できていることを確認しました。
+  ```text
+  Start User-main program.
+  task 1
+  task 2
+  task 1
+  task 2
+  task 1
+  task 1
+  task 2
+  ```
+
+#### 1-2. カメラI2C接続検証 ([tron_i2c_test](src/tron_i2c_test))
+* **技術概要**:
+  MIPI-CSI2カメラ（OV5640）の接続を検証するためのプログラムです。カメラへのXCLK（24MHz）の供給、ハードウェアリセット、およびI2C通信を介したレジスタIDの読み出しを検証します。
+* **コードにおける重要ポイント**:
+  I2C通信は非同期処理となるため、FSPドライバが発行する完了イベントコールバック（`g_cam_i2c_master_user_callback`）からOS APIを利用せずにコールバック待受変数 `i2c_event` を介したミリ秒精度のビジータイムアウト待受制御を実装しています。
+  ```cpp
+  // I2C 16ビットレジスタ読み出し処理
+  static bool rdSensorReg16_8(uint16_t regID, uint8_t *regDat)
+  {
+      fsp_err_t err;
+      uint8_t data[2] = {(uint8_t)(regID >> 8), (uint8_t)regID};
+      
+      i2c_event = (i2c_master_event_t)0;
+      err = R_IIC_MASTER_Write(&g_cam_i2c_master_ctrl, data, 2, true);
+      if (FSP_SUCCESS == err) {
+          err = wait_i2c_event(); // 割り込みイベント待受
+      }
+      ...
+  }
+  ```
+* **実行時の出力ログ**:
+  I2Cバスアドレス `0x3C` のOV5640カメラに対し、Product IDレジスタ（`0x300A`/`0x300B`）へコマンドを発行し、OV5640の固有IDである `H=0x56, L=0x40` の読み出しに成功して接続が検証されたことを示しています。
+  ```text
+  Start User-main program (Camera Connection Test).
+
+  === Camera I2C Connection Test Start ===
+  Resetting Camera (CAMERA_RESET -> P709)...
+  Starting GPT Clock for Camera XCLK (g_cam_clk)...
+  Opening I2C Master (g_cam_i2c_master)...
+  Reading OV5640 Product ID registers via I2C...
+  Product ID Read: H = 0x56, L = 0x40
+  SUCCESS: Camera connection verified! (OV5640 detected)
+  ```
+
+#### 1-3. 液晶描画およびSDRAM物理テスト ([tron_d2_test](src/tron_d2_test))
+* **技術概要**:
+  外部SDRAMを用いた液晶ディスプレイ（GLCDC）への描画テストおよびDave2D GPUアクセラレータによるグラフィックス処理、キャッシュコヒーレンシの整合性テストです。
+* **コードにおける重要ポイント**:
+  チラつきのない60Hz描画を実現するため、トリプルバッファローテーション制御（`draw_buf`, `pending_buf`, `display_buf`）を実装。GLCDCの垂直同期（Vblank）割り込み（`DISPLAY_EVENT_LINE_DETECTION`）を契機に `tk_wup_tsk(tskid_1)` でタスクを同期起床させ、無駄なポーリング負荷（CPU 0%）で完全に同期したバッファフリップを行います。
+  また、DMAでアクセスされる外部SDRAMとCPUキャッシュの不整合を防ぐため、描画コマンドの前後でキャッシュフラッシュ（`SCB_CleanInvalidateDCache`）を厳密に制御しています。
+  ```cpp
+  // 液晶 GLCDC 垂直同期割り込みコールバック
+  extern "C" void lcd_glcdc_callback(display_callback_args_t * p_args)
+  {
+      if (p_args->event == DISPLAY_EVENT_LINE_DETECTION)
+      {
+          vblank_flag = true;
+          tk_wup_tsk(tskid_1); // 描画タスクをVblank同期で起床
+      }
+  }
+  ```
+
     | LCDトリプルバッファ検証(1) | LCDトリプルバッファ検証(2) |
     | :---: | :---: |
     | ![tron_lcd_d1](img/tron_lcd_d1.png) | ![tron_lcd_d3](img/tron_lcd_d3.png) |
-    
-  - D/AVE 2Dによるバイリニア（双線形）補間拡大コピー命令をドライバ経由でGPUへオフロードし、320x240のカメラ入力をCPU負荷ほぼゼロで 800x600 へ拡大描画。
-    
+
+* **実行時の出力ログ**:
+  外部物理メモリ（SDRAM）への書き込み検証テストが成功し、Dave2D GPUによる描画ループが液晶のリフレッシュ割り込み（Vblank IRQs）に完全に追従してフリップしていることを確認しました。
+  ```text
+  Start User-main program (Camera & LCD D2D Test).
+  Testing physical SDRAM at address 0x90000000...
+  SDRAM verification SUCCESS!
+  Clearing SDRAM framebuffers to black...
+  Initializing LCD (GLCDC)... 
+  LCD Backlight enabled.
+  Initializing D/AVE 2D Graphics Engine...
+  Starting D/AVE 2D Rendering Loop (SDRAM Triple Buffer Bouncing Ball)...
+  Loop 0: rendering bouncing ball... (Vblank IRQs: 42)
+  Loop 100: rendering bouncing ball... (Vblank IRQs: 142)
+  ```
+
+#### 1-4. カメラ表示検証プログラム ([tron_mipi_test_ori](src/tron_mipi_test_ori))
+* **技術概要**:
+  MIPI-CSI2経由のOV5640カメラからの映像ストリーム入力と、D/AVE 2D GPUによる画像の縮小・拡大処理、そして液晶表示出力をすべて統合し、ちらつきや遅延のない完全同期のライブ映像描画システムを実証します。
+* **コードにおける重要ポイント**:
+  320x240ピクセルRGB565でキャプチャされたカメラのイメージバッファアドレスを、Dave2Dの転送元バッファ（`d2_setblitsrc`）に指定。液晶パネル解像度（800x600）へ拡大するためにバイリニア補間フィルタ（`d2_tm_filter`）を適用した高速ハードウェア拡大転送（`d2_blitcopy`）を実行します。
+  ```cpp
+  // カメラ画像を800x600に拡大してバッファへ描画
+  d2_setblitsrc(d2_handle, (void *)p_camera_capture_buffer_stored, 320, 320, 240, d2_mode_rgb565);
+  d2_blitcopy(d2_handle,
+              320, 240,
+              0, 0,
+              800 << 4, 600 << 4,  // 拡大後幅・高
+              112 << 4, 0 << 4,    // 中央寄せ描画オフセット
+              d2_tm_filter);       // バイリニアフィルタを適用
+  ```
+
     | カメラ表示(1) | カメラ表示(2) |
     | :---: | :---: |
     | ![tron_mipi_2](img/tron_mipi_2.png) | ![tron_mipi_3](img/tron_mipi_3.png) |
+
+* **実行時の出力ログ**:
+  MIPIカメラドライバおよびGLCDC表示が正常にリンクされ、カメラがキャプチャした最新の画像バッファアドレス（`0x90280000`）から液晶画面へ同期コピーを正常に繰り返しているログ出力を示しています。
+  ```text
+  === Camera MIPI-CSI2 & LCD Display D2D Start ===
+  Initializing LCD (GLCDC)... 
+  LCD Backlight enabled.
+  Initializing D/AVE 2D Graphics Engine...
+  Initializing MIPI-CSI2 Camera (OV5640)... 
+  SUCCESS: Camera initialized and capture started.
+  Entering Real-time Camera Display Loop...
+  Loop 0: buffer = 0x90280000, vsync_cnt = 42
+    Buf Data: 0xF800 0xF800 0xF800 0xF800 0xF800 0xF800 0xF800 0xF800
+  Loop 100: buffer = 0x90280000, vsync_cnt = 142
+    Buf Data: 0x4B20 0x4B20 0x4B40 0x4B60 0x4B60 0x4B60 0x4B40 0x4B20
+  ```
 
 ### 2. 画像分類（MobileNet V1）
 * **対象フォルダ**: [tron_img_cpu](src/tron_img_cpu) / [tron_img_npu](src/tron_img_npu)
