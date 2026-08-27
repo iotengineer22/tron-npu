@@ -150,40 +150,37 @@ Identifies and counts tiny electronic components (Pico, Xiao, nRF54L15) and IC c
 * **Target Folders**: [tron_img_cpu](src/tron_img_cpu) / [tron_img_npu](src/tron_img_npu)
 - **Overview**:
   Hosted the TensorFlow Lite Micro engine inside a μT-Kernel 3.0 task to run real-time MobileNet V1-based object classification on live camera streams.
-  
-  | Image Classification (1) | Image Classification (2) |
-  | :---: | :---: |
-  | ![tron_img7](img/tron_img7.png) | ![tron_img8](img/tron_img8.png) |
-  
 - **Key Code Implementation Points**:
   - Optimized camera RGB565 frame conversions to the 224x224 RGB888 format expected by the model.
   - Integrated NPU driver initialization (`RM_ETHOSU_Open`) and coupled it with strict D-Cache maintenance operations (`SCB_CleanDCache_by_Addr` and `SCB_InvalidateDCache_by_Addr`) to prevent CPU-NPU data mismatch under Cortex-M85 caching.
+
+    | Image Classification (1) | Image Classification (2) |
+    | :---: | :---: |
+    | ![tron_img7](img/tron_img7.png) | ![tron_img8](img/tron_img8.png) |
 
 ### 3. YOLO Face Detection
 * **Target Folders**: [tron_yolo_face_cpu](src/tron_yolo_face_cpu) / [tron_yolo_face_npu](src/tron_yolo_face_npu)
 - **Overview**:
   Offloaded the YOLO-based object detection model (which takes ~2,090 ms on the CPU) to the Ethos-U55 NPU, squeezing latency down to **16 ms** and securing fluid face bounding-box overlays on the 60 Hz display.
-  
-  | YOLO Face Detection (1) | YOLO Face Detection (2) |
-  | :---: | :---: |
-  | ![tron_face6](img/tron_face6.png) | ![tron_face7](img/tron_face7.png) |
-  
 - **Key Code Implementation Points**:
   - Implemented an **asynchronous frame-skipping pipeline** governed by a state flag (`g_ai_task_busy`) to separate the 60 Hz display loop (`task_ui`) from the variable-rate AI task (`task_ai` / Priority 11).
   - Optimized the inverse quantization and coordinate mapping post-process (`yolo_face_postprocess`) to map the int8 quantization outputs back to physical display pixels quickly.
 
+    | YOLO Face Detection (1) | YOLO Face Detection (2) |
+    | :---: | :---: |
+    | ![tron_face6](img/tron_face6.png) | ![tron_face7](img/tron_face7.png) |
+
 ### 4. PCB Component Detection (FOMO)
 * **Target Folders**: [tron_edge_fomo_cpu_type](src/tron_edge_fomo_cpu_type) / [tron_edge_fomo_npu_type](src/tron_edge_fomo_npu_type) / [tron_edge_fomo_ic](src/tron_edge_fomo_ic)
-  
-  | FOMO Component Detection (1) | FOMO Component Detection (2) |
-  | :---: | :---: |
-  | ![tron_fomo5](img/tron_fomo5.png) | ![tron_fomo6](img/tron_fomo6.png) |
-  
 - **Overview**:
   Validated the Edge Impulse FOMO model on the Ethos-U55 NPU to identify and count tiny components (Pico, Xiao, nRF54L15) and IC chips on PCBs in real-time.
 - **Key Code Implementation Points**:
   - Developed a fast post-processor (`fomo_postprocess`) that parses the grid-cell output tensors to extract and label coordinates of multiple components.
   - Strictly aligned the tensor arena in SRAM/SDRAM to the Cortex-M85 32-byte cache line limit via `BSP_ALIGN_VARIABLE(32)`, preventing neighboring memory blocks from getting corrupted during cache invalidations.
+
+    | FOMO Component Detection (1) | FOMO Component Detection (2) |
+    | :---: | :---: |
+    | ![tron_fomo5](img/tron_fomo5.png) | ![tron_fomo6](img/tron_fomo6.png) |
 
 ---
 
