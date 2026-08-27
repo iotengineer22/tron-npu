@@ -1,0 +1,32 @@
+# =========================================================================
+# Git Ignore Rules for Renesas RA FSP & μT-Kernel 3.0 Projects
+# =========================================================================
+
+# Build Artifact Directories (Compiler output)
+**/Debug/
+**/Release/
+
+# Tool Logs
+*.log
+**/JLinkLog.log
+
+# IDE / Compiler Local Settings (User-specific)
+**/.settings/
+**/.vscode/
+
+# Local OS files
+.DS_Store
+Thumbs.db
+
+# Build output files
+**/*.o
+**/*.obj
+**/*.d
+**/*.elf
+**/*.map
+**/*.srec
+**/*.hex
+**/*.bin
+**/*.pdr
+**/*.rpd
+**/*.sbd
