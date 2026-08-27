@@ -395,3 +395,16 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 * **Real-Time OS (RTOS)**: μT-Kernel 3.0
 * **Target Board**: EK-RA8P1 Evaluation Board
 * **How to Build**: Run `build.bat` inside each program directory, or import the project into e2 studio. Connect to a serial terminal (115200 bps) to inspect initialization and real-time inference result logs.
+
+---
+
+## 7. References
+
+This project references and utilizes the following official sample codes and repositories:
+
+* **Real-Time OS (μT-Kernel 3.0) Porting Base**:
+  * **[TRON Forum μT-Kernel 3.0 BSP2](https://github.com/tron-forum/mtk3_bsp2)** (GitHub) - Porting layer and base task templates for the EK-RA8P1 board.
+* **Peripherals Control (I2C / GLCDC / Dave2D / MIPI-CSI2)**:
+  * **[Renesas RA FSP Examples](https://github.com/renesas/ra-fsp-examples)** (GitHub) - Reference projects for `iic_master`, `glcdc`, `drw` (D/AVE 2D), and `mipi_csi` camera integration.
+* **Arm Ethos-U55 NPU AI Inference Integration**:
+  * **[Renesas FSP (Flexible Software Package)](https://github.com/renesas/fsp)** (GitHub) - Driver stack (`r_ethosu`) and TensorFlow Lite Micro integration guides for the Arm Ethos-U55 NPU.

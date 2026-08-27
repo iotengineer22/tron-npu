@@ -78,7 +78,7 @@
 ### 4-1. ファームウェア (基礎ペリフェラル・RTOS検証)
 RTOSマルチタスクの基本スケジューリング、シリアル出力、I2C接続、Dave2Dによる基本描画、カメラと液晶パネルのダイレクト接続テストを検証した、システムの土台となるプログラム群です。
 
-| フォルダ名 | アンプケーションの役割 | 使用エンジン (AI / 描画) |
+| フォルダ名 | アプリケーションの役割 | 使用エンジン (AI / 描画) |
 | :--- | :--- | :--- |
 | **[tron_serial_test](src/tron_serial_test)** | T-Monitorシリアル並行出力検証 | なし (シリアル通信のみ) |
 | **[tron_i2c_test](src/tron_i2c_test)** | カメラ接続検証テストプログラム | なし (シリアル診断のみ) |
@@ -403,3 +403,16 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 * **リアルタイムOS**: μT-Kernel 3.0
 * **実行環境**: EK-RA8P1 評価ボード
 * **ビルド方法**: 各プログラムフォルダ内の `build.bat` を実行、または e2 studio 上でインポートしてビルドします。シリアルコンソール（115200 bps）を接続し、起動時の接続確認・推論結果ログを確認できます。
+
+---
+
+## 7. 参照サンプル・ライブラリ (References)
+
+本システムの開発にあたり、以下の公式サンプルプログラムおよびリポジトリを参照・活用しています。
+
+* **リアルタイムOS (μT-Kernel 3.0) 移植基盤**:
+  * **[TRON Forum μT-Kernel 3.0 BSP2](https://github.com/tron-forum/mtk3_bsp2)** (GitHub) - EK-RA8P1 向け μT-Kernel 3.0 移植および基本タスクテンプレートの参照元。
+* **周辺ペリフェラル制御 (I2C / GLCDC / Dave2D / MIPI-CSI2)**:
+  * **[Renesas RA FSP Examples](https://github.com/renesas/ra-fsp-examples)** (GitHub) - `iic_master`, `glcdc`, `drw` (D/AVE 2D), `mipi_csi` サンプルプロジェクトの参照元。
+* **Arm Ethos-U55 NPU AI推論統合**:
+  * **[Renesas FSP (Flexible Software Package)](https://github.com/renesas/fsp)** (GitHub) - Arm Ethos-U55 NPU用ドライバスタック（`r_ethosu`）および TensorFlow Lite Micro 統合の参照元。
