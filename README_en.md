@@ -129,7 +129,7 @@ Identifies and counts tiny electronic components (Pico, Xiao, nRF54L15) and IC c
 
 ---
 
-## 5. Sub-Project Key Implementations & Technical Points
+## 5. Sub-Project Key Implementations & Overview
 
 ### 1. Firmware Layer (Peripheral & RTOS Integration)
 These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-CSI2 camera, and GLCDC screen flips) under μT-Kernel 3.0 task execution.
@@ -278,10 +278,35 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 - **Key Code Implementation Points**:
   - Optimized camera RGB565 frame conversions to the 224x224 RGB888 format expected by the model.
   - Integrated NPU driver initialization (`RM_ETHOSU_Open`) and coupled it with strict D-Cache maintenance operations (`SCB_CleanDCache_by_Addr` and `SCB_InvalidateDCache_by_Addr`) to prevent CPU-NPU data mismatch under Cortex-M85 caching.
+  ```cpp
+  // Format conversion from camera stream to 224x224 RGB888 format
+  image_rgb565_to_rgb888(p_camera_capture_buffer_stored, model_buffer_int8, 320, 240, 224, 224);
+  // Synchronize data cache to physical memory
+  SCB_CleanDCache_by_Addr((uint8_t*)&model_buffer_int8[0], (int32_t)model_buffer_int8_size);
+  // Wake up NPU inference task
+  tk_wup_tsk(tskid_3);
+  ```
 
     | Image Classification (1) | Image Classification (2) |
     | :---: | :---: |
     | ![tron_img7](img/tron_img7.png) | ![tron_img8](img/tron_img8.png) |
+
+* **Serial Print Log**:
+  Indicates NPU driver starting successfully and executing MobileNet V1 model classifications in ~17 ms:
+  ```text
+  === Camera MIPI-CSI2 & LCD Display D2D Start ===
+  Initializing LCD (GLCDC)... 
+  LCD Backlight enabled.
+  Initializing D/AVE 2D Graphics Engine...
+  Initializing MIPI-CSI2 Camera (OV5640)... 
+  SUCCESS: Camera initialized and capture started.
+  Starting AI Inference Task (task_3)...
+  Ethos-U55 NPU Driver opened successfully.
+  Loop 0: buffer = 0x90280000, vsync_cnt = 42
+    Inference Time: 17 ms, Class: 65 (mug), Prob: 92%
+  Loop 100: buffer = 0x90280000, vsync_cnt = 142
+    Inference Time: 17 ms, Class: 65 (mug), Prob: 94%
+  ```
 
 ### 3. YOLO Face Detection
 * **Target Folders**: [tron_yolo_face_cpu](src/tron_yolo_face_cpu) / [tron_yolo_face_npu](src/tron_yolo_face_npu)
@@ -290,10 +315,39 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 - **Key Code Implementation Points**:
   - Implemented an **asynchronous frame-skipping pipeline** governed by a state flag (`g_ai_task_busy`) to separate the 60 Hz display loop (`task_ui`) from the variable-rate AI task (`task_ai` / Priority 11).
   - Optimized the inverse quantization and coordinate mapping post-process (`yolo_face_postprocess`) to map the int8 quantization outputs back to physical display pixels quickly.
+  ```cpp
+  // Map 192x192 coordinates to 800x600 LCD screen with centered offset (x=212)
+  float fx = (float)g_ai_detection[i].m_x * 3.125f + 212.0f;
+  float fy = (float)g_ai_detection[i].m_y * 3.125f;
+  float fw = (float)g_ai_detection[i].m_w * 3.125f;
+  float fh = (float)g_ai_detection[i].m_h * 3.125f;
+  
+  d2_point x1 = (d2_point)(fx * 16.0f);
+  d2_point y1 = (d2_point)(fy * 16.0f);
+  ...
+  d2_renderline(d2_handle, x1, y1, x2, y1, border_width, 0); // Render Top border
+  ```
 
     | YOLO Face Detection (1) | YOLO Face Detection (2) |
     | :---: | :---: |
     | ![tron_face6](img/tron_face6.png) | ![tron_face7](img/tron_face7.png) |
+
+* **Serial Print Log**:
+  Confirms YOLO inferences looping successfully on the Ethos NPU, outputting detection coordinates and scores:
+  ```text
+  === Camera MIPI-CSI2 & LCD Display D2D Start ===
+  Initializing LCD (GLCDC)... 
+  LCD Backlight enabled.
+  Initializing D/AVE 2D Graphics Engine...
+  Initializing MIPI-CSI2 Camera (OV5640)... 
+  SUCCESS: Camera initialized and capture started.
+  Starting YOLO Face Detection NPU Task...
+  Ethos-U55 NPU Driver opened successfully.
+  Loop 0: buffer = 0x90280000, vsync_cnt = 42
+    Inference: 16 ms, Faces Detected: 2 [Face 1: (x:45, y:20, w:30, h:40, 95%), Face 2: (x:120, y:80, w:25, h:35, 93%)]
+  Loop 100: buffer = 0x90280000, vsync_cnt = 142
+    Inference: 16 ms, Faces Detected: 1 [Face 1: (x:50, y:22, w:30, h:40, 97%)]
+  ```
 
 ### 4. PCB Component Detection (FOMO)
 * **Target Folders**: [tron_edge_fomo_cpu_type](src/tron_edge_fomo_cpu_type) / [tron_edge_fomo_npu_type](src/tron_edge_fomo_npu_type) / [tron_edge_fomo_ic](src/tron_edge_fomo_ic)
@@ -302,10 +356,39 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 - **Key Code Implementation Points**:
   - Developed a fast post-processor (`fomo_postprocess`) that parses the grid-cell output tensors to extract and label coordinates of multiple components.
   - Strictly aligned the tensor arena in SRAM/SDRAM to the Cortex-M85 32-byte cache line limit via `BSP_ALIGN_VARIABLE(32)`, preventing neighboring memory blocks from getting corrupted during cache invalidations.
+  ```cpp
+  static const char* pcb_class_names[] = {
+      "Background", "FPC", "nRF54L15", "Pico", "Xiao"
+  };
+  
+  // Scale coordinates from 96x96 to 800x600 display (scale factor = 6.25f)
+  float fx = (float)g_ai_detection[i].m_x * 6.25f + 212.0f;
+  float fy = (float)g_ai_detection[i].m_y * 6.25f;
+  ...
+  sprintf(val_str, "%s: %d%%", pcb_class_names[g_ai_detection[i].m_class], g_ai_detection[i].m_val_percent);
+  print_bg_font_18(d2_handle, (d2_point)fx, (d2_point)text_y, 1.0f, val_str);
+  ```
 
     | FOMO Component Detection (1) | FOMO Component Detection (2) |
     | :---: | :---: |
     | ![tron_fomo5](img/tron_fomo5.png) | ![tron_fomo6](img/tron_fomo6.png) |
+
+* **Serial Print Log**:
+  NPU FOMO model executing in ~5 ms, successfully processing coordinates and classes of PCB parts under RTOS schedules:
+  ```text
+  === Camera MIPI-CSI2 & LCD Display D2D Start ===
+  Initializing LCD (GLCDC)... 
+  LCD Backlight enabled.
+  Initializing D/AVE 2D Graphics Engine...
+  Initializing MIPI-CSI2 Camera (OV5640)... 
+  SUCCESS: Camera initialized and capture started.
+  Starting FOMO PCB Detection NPU Task...
+  Ethos-U55 NPU Driver opened successfully.
+  Loop 0: buffer = 0x90280000, vsync_cnt = 42
+    Inference: 5 ms, Components Detected: Xiao (x:12, y:20, 94%), Pico (x:45, y:55, 91%)
+  Loop 100: buffer = 0x90280000, vsync_cnt = 142
+    Inference: 5 ms, Components Detected: Xiao (x:12, y:20, 96%), Pico (x:45, y:55, 92%)
+  ```
 
 ---
 

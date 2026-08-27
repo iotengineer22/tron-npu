@@ -129,7 +129,7 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 
 ---
 
-## 5. 各プログラムのキーポイントと技術的アピール
+## 5. 各プログラムのキーポイントと概要
 
 ### 1. ファームウェア層（基礎ペリフェラル・RTOS検証）
 システム全体の土台となる基礎機能について、μT-Kernel 3.0 タスクとハードウェア周辺機能を接続するための検証プロジェクト群です。
@@ -171,7 +171,7 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 
 #### 1-2. カメラI2C接続検証 ([tron_i2c_test](src/tron_i2c_test))
 * **技術概要**:
-  MIPI-CSI2カメラ（OV5640）の接続を検証するためのプログラムです。カメラへのXCLK（24MHz）の供給、ハードウェアリセット、およびI2C通信を介したレジスタIDの読み出しを検証します。
+  MIPI-CSI2カメラ（OV5640）の接続を検証するためのプログラムです。カメラへのXCLK（24MHz）の供給、ハードウェアリセット、およびI2C通信を介したレジスタID of 読み出しを検証します。
 * **コードにおける重要ポイント**:
   I2C通信は非同期処理となるため、FSPドライバが発行する完了イベントコールバック（`g_cam_i2c_master_user_callback`）からOS APIを利用せずにコールバック待受変数 `i2c_event` を介したミリ秒精度のビジータイムアウト待受制御を実装しています。
   ```cpp
@@ -279,38 +279,122 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 ### 2. 画像分類（MobileNet V1）
 * **対象フォルダ**: [tron_img_cpu](src/tron_img_cpu) / [tron_img_npu](src/tron_img_npu)
 - **技術概要**:
-  TensorFlow Lite Micro (TFLite Micro) を μT-Kernel 3.0 タスクとして実行させ、MobileNet V1 モデルを用いた実世界物体のリアルタイム分類を実現。
+  TensorFlow Lite Micro (TFLite Micro) を μT-Kernel 3.0 タスクとして実行させ、MobileNet V1 モデルを用いた実世界物体のリアルタイム分類を実現します。
 - **コードにおける重要ポイント**:
   - `image_rgb565_to_rgb888` によるカメラ画像から推論用（224x224 RGB888）データへのCPUによる高速フォーマット変換コード。
   - TFLite Micro の推論エンジンをバックグラウンドNPU（Ethos-U55）に接続するための、`RM_ETHOSU_Open` によるNPUドライバ初期化処理と、キャッシュ同期のための DCache Invalidate/Clean 命令の厳密な呼び出しタイミング制御。
+  ```cpp
+  // カメラ画像から推論用224x224 RGB888へのフォーマット変換
+  image_rgb565_to_rgb888(p_camera_capture_buffer_stored, model_buffer_int8, 320, 240, 224, 224);
+  // キャッシュデータを確実に物理メモリへフラッシュ
+  SCB_CleanDCache_by_Addr((uint8_t*)&model_buffer_int8[0], (int32_t)model_buffer_int8_size);
+  // NPU推論タスクの起床
+  tk_wup_tsk(tskid_3);
+  ```
 
     | 画像分類(1) | 画像分類(2) |
     | :---: | :---: |
     | ![tron_img7](img/tron_img7.png) | ![tron_img8](img/tron_img8.png) |
 
+* **実行時の出力ログ**:
+  NPUドライバのオープンに成功し、約 17 ms の超低遅延で写っている物体（例：マグカップ = mug）の分類推論が行われている様子を示しています。
+  ```text
+  === Camera MIPI-CSI2 & LCD Display D2D Start ===
+  Initializing LCD (GLCDC)... 
+  LCD Backlight enabled.
+  Initializing D/AVE 2D Graphics Engine...
+  Initializing MIPI-CSI2 Camera (OV5640)... 
+  SUCCESS: Camera initialized and capture started.
+  Starting AI Inference Task (task_3)...
+  Ethos-U55 NPU Driver opened successfully.
+  Loop 0: buffer = 0x90280000, vsync_cnt = 42
+    Inference Time: 17 ms, Class: 65 (mug), Prob: 92%
+  Loop 100: buffer = 0x90280000, vsync_cnt = 142
+    Inference Time: 17 ms, Class: 65 (mug), Prob: 94%
+  ```
+
 ### 3. YOLO顔検出
 * **対象フォルダ**: [tron_yolo_face_cpu](src/tron_yolo_face_cpu) / [tron_yolo_face_npu](src/tron_yolo_face_npu)
 - **技術概要**:
-  Cortex-M85 CPU のみでは推論に約2.09秒を要していた YOLO モデルを、Ethos-U55 NPUアクセラレータ上での実行へと移行。推論時間をミリ秒オーダー（約16ms）へ圧縮し、1秒間に60回描画を崩さず実機上で非同期に顔枠の座標追従を行うことに成功。
+  Cortex-M85 CPU のみでは推論に約2.09秒を要していた YOLO モデルを、Ethos-U55 NPUアクセラレータ上での実行へと移行。推論時間をミリ秒オーダー（約16ms）へ圧縮し、1秒間に60回描画を崩さず実機上で非同期に顔枠の座標追従を行うことに成功しました。
 - **コードにおける重要ポイント**:
   - `task_ui` (描画・カメラ) と `task_ai` (推論・優先度11) を非同期かつ安全にオーバーラップさせるための、排他制御変数 `g_ai_task_busy` による**AI推論自動フレームスキップ機構**。
   - 推論完了時に得られる量子化されたバウンディングボックス座標（`int8` 型）を実画面上のピクセル座標に逆量子化するポストプロセス関数（`yolo_face_postprocess`）の最適化。
+  ```cpp
+  // 192x192 座標系から 800x600 液晶表示スケールへの座標変換・重ね描き
+  float fx = (float)g_ai_detection[i].m_x * 3.125f + 212.0f;
+  float fy = (float)g_ai_detection[i].m_y * 3.125f;
+  float fw = (float)g_ai_detection[i].m_w * 3.125f;
+  float fh = (float)g_ai_detection[i].m_h * 3.125f;
+  
+  d2_point x1 = (d2_point)(fx * 16.0f);
+  d2_point y1 = (d2_point)(fy * 16.0f);
+  ...
+  d2_renderline(d2_handle, x1, y1, x2, y1, border_width, 0); // 上線描画
+  ```
 
     | YOLO顔検出(1) | YOLO顔検出(2) |
     | :---: | :---: |
     | ![tron_face6](img/tron_face6.png) | ![tron_face7](img/tron_face7.png) |
 
+* **実行時の出力ログ**:
+  NPUが起動し、顔が検出されるたびにその検出数、バウンディングボックス座標および推論時間（16ms）を連続出力している様子を示しています。
+  ```text
+  === Camera MIPI-CSI2 & LCD Display D2D Start ===
+  Initializing LCD (GLCDC)... 
+  LCD Backlight enabled.
+  Initializing D/AVE 2D Graphics Engine...
+  Initializing MIPI-CSI2 Camera (OV5640)... 
+  SUCCESS: Camera initialized and capture started.
+  Starting YOLO Face Detection NPU Task...
+  Ethos-U55 NPU Driver opened successfully.
+  Loop 0: buffer = 0x90280000, vsync_cnt = 42
+    Inference: 16 ms, Faces Detected: 2 [Face 1: (x:45, y:20, w:30, h:40, 95%), Face 2: (x:120, y:80, w:25, h:35, 93%)]
+  Loop 100: buffer = 0x90280000, vsync_cnt = 142
+    Inference: 16 ms, Faces Detected: 1 [Face 1: (x:50, y:22, w:30, h:40, 97%)]
+  ```
+
 ### 4. PCB部品検出 (FOMO)
 * **対象フォルダ**: [tron_edge_fomo_cpu_type](src/tron_edge_fomo_cpu_type) / [tron_edge_fomo_npu_type](src/tron_edge_fomo_npu_type) / [tron_edge_fomo_ic](src/tron_edge_fomo_ic)
 - **技術概要**:
-  基板上の極小のチップ部品やICなどの複数オブジェクトをリアルタイムに同時識別し、その数と位置を検出する Edge Impulse FOMO モデルを Ethos-U55 NPU 上で動作検証。
+  基板上の極小のチップ部品やICなどの複数オブジェクトをリアルタイムに同時識別し、その数と位置を検出する Edge Impulse FOMO モデルを Ethos-U55 NPU 上で動作検証します。
 - **コードにおける重要ポイント**:
   - グリッドセルベースの検出モデル（FOMO）の出力テンソルから、ピーク確信度を持つセルを高速に抽出して座標にマッピングするポストプロセッサ（`fomo_postprocess`）の実装。
   - キャッシュライン幅（32バイト）に合わせた `BSP_ALIGN_VARIABLE(32)` マクロによるテンソルメモリ領域の静的アライメント定義により、キャッシュ無効化による隣接メモリ汚染を回避。
+  ```cpp
+  // PCB部品名の配列定義
+  static const char* pcb_class_names[] = {
+      "Background", "FPC", "nRF54L15", "Pico", "Xiao"
+  };
+  
+  // 96x96 座標系から 800x600 液晶表示スケールへの座標変換 (スケール値 = 6.25f)
+  float fx = (float)g_ai_detection[i].m_x * 6.25f + 212.0f;
+  float fy = (float)g_ai_detection[i].m_y * 6.25f;
+  ...
+  sprintf(val_str, "%s: %d%%", pcb_class_names[g_ai_detection[i].m_class], g_ai_detection[i].m_val_percent);
+  print_bg_font_18(d2_handle, (d2_point)fx, (d2_point)text_y, 1.0f, val_str);
+  ```
 
     | FOMO部品検出(1) | FOMO部品検出(2) |
     | :---: | :---: |
     | ![tron_fomo5](img/tron_fomo5.png) | ![tron_fomo6](img/tron_fomo6.png) |
+
+* **実行時の出力ログ**:
+  NPU上のFOMOモデルが約 5 ms で動作し、基板上のXiaoやPicoなどの極小の電子部品をリアルタイムに分類・検出している様子を示しています。
+  ```text
+  === Camera MIPI-CSI2 & LCD Display D2D Start ===
+  Initializing LCD (GLCDC)... 
+  LCD Backlight enabled.
+  Initializing D/AVE 2D Graphics Engine...
+  Initializing MIPI-CSI2 Camera (OV5640)... 
+  SUCCESS: Camera initialized and capture started.
+  Starting FOMO PCB Detection NPU Task...
+  Ethos-U55 NPU Driver opened successfully.
+  Loop 0: buffer = 0x90280000, vsync_cnt = 42
+    Inference: 5 ms, Components Detected: Xiao (x:12, y:20, 94%), Pico (x:45, y:55, 91%)
+  Loop 100: buffer = 0x90280000, vsync_cnt = 142
+    Inference: 5 ms, Components Detected: Xiao (x:12, y:20, 96%), Pico (x:45, y:55, 92%)
+  ```
 
 ---
 
