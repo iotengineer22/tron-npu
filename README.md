@@ -120,8 +120,8 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 | **[tron_edge_fomo_ic](src/tron_edge_fomo_ic)** (参考) | ICチップ検出 NPU高速版（参考） | **Arm Ethos-U55 NPU** / Dave2D |
 
 **デモ動画:**
-[![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/3aFkyZPR1v0/hqdefault.jpg)](https://youtu.be/3aFkyZPR1v0)
-* [YouTubeリンク: PCB Object Detection using Ethos-U55 NPU](https://youtu.be/3aFkyZPR1v0)
+[![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/_uKRamoLaNA/hqdefault.jpg)](https://youtu.be/_uKRamoLaNA)
+* [YouTubeリンク: PCB Object Detection using Ethos-U55 NPU](https://youtu.be/_uKRamoLaNA)
 
 ---
 

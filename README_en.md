@@ -120,8 +120,8 @@ Identifies and counts tiny electronic components (Pico, Xiao, nRF54L15) and IC c
 | **[tron_edge_fomo_ic](src/tron_edge_fomo_ic)** (Reference) | IC chip detection on NPU (Reference) | **Arm Ethos-U55 NPU** / Dave2D |
 
 **Demo Video:**
-[![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/3aFkyZPR1v0/hqdefault.jpg)](https://youtu.be/3aFkyZPR1v0)
-* [YouTube Link: PCB Object Detection using Ethos-U55 NPU](https://youtu.be/3aFkyZPR1v0)
+[![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/_uKRamoLaNA/hqdefault.jpg)](https://youtu.be/_uKRamoLaNA)
+* [YouTube Link: PCB Object Detection using Ethos-U55 NPU](https://youtu.be/_uKRamoLaNA)
 
 ---
 
