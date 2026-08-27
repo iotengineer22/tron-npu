@@ -138,7 +138,7 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 * **Overview**:
   Validates concurrent UART serial printing using T-Monitor API from two separate tasks running under the μT-Kernel 3.0 priority scheduling scheduler.
   
-  ![μT-Kernel 3.0 Parallel UART Printing Diagram](img/diagram_serial_test.jpg)
+  ![μT-Kernel 3.0 Parallel UART Printing Diagram](img/diagram_serial_test.png)
 * **Key Code Implementation Points**:
   OS headers are wrapped in `extern "C"` linkage blocks to prevent compilation symbol resolution issues when compiling with C++. Task creation is performed by specifying properties inside the `T_CTSK` structure.
   ```cpp
@@ -173,7 +173,7 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 * **Overview**:
   Tests camera hardware reset, provides 24MHz clock (XCLK), and queries the camera module (OV5640) registers via I2C to verify communication.
   
-  ![I2C Camera Transaction Sequence Diagram](img/diagram_i2c_test.jpg)
+  ![I2C Camera Transaction Sequence Diagram](img/diagram_i2c_test.png)
 * **Key Code Implementation Points**:
   Since I2C writes/reads are asynchronous, we implement a polling-based callback wait (`wait_i2c_event`) using a volatile callback flag `i2c_event` received from the I2C event interrupt handler `g_cam_i2c_master_user_callback`.
   ```cpp
@@ -213,7 +213,7 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 * **Overview**:
   Validates 2D graphics hardware engine (Dave2D) drawing features, implements screen buffering, and runs physical write/read memory self-tests on the external SDRAM space.
   
-  ![GLCDC LCD Triple Buffering Flowchart](img/diagram_d2_test.jpg)
+  ![GLCDC LCD Triple Buffering Flowchart](img/diagram_d2_test.png)
 * **Key Code Implementation Points**:
   Achieves a tear-free 60 Hz layout by running a Triple-Buffering rotation (`draw_buf`, `pending_buf`, `display_buf`). The drawing task blocks on `tk_slp_tsk` and is woke up at the vertical blanking edge by `tk_wup_tsk(tskid_1)` within the GLCDC Vblank callback.
   Ensures memory consistency against DMA transactions by performing clean cache calls (`SCB_CleanInvalidateDCache`) between CPU edits and GPU flushes.
@@ -251,7 +251,7 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 * **Overview**:
   Integrates MIPI-CSI2 camera acquisition, bilinear graphics scaling via Dave2D GPU, and screen flips on the GLCDC display to drive real-time live video streams without tearing.
   
-  ![MIPI-CSI2 Camera Display System Dataflow](img/diagram_mipi_test.jpg)
+  ![MIPI-CSI2 Camera Display System Dataflow](img/diagram_mipi_test.png)
 * **Key Code Implementation Points**:
   Instructs the Dave2D GPU to treat the camera capture output `p_camera_capture_buffer_stored` as the source texture. bilinear interpolation scaling (`d2_tm_filter`) is applied using the hardware-accelerated `d2_blitcopy` command.
   ```cpp
@@ -289,7 +289,7 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 - **Overview**:
   Hosted the TensorFlow Lite Micro engine inside a μT-Kernel 3.0 task to run real-time MobileNet V1-based object classification on live camera streams, accelerated via the Ethos-U55 NPU.
   
-  ![MobileNet V1 NPU Pipeline Architecture Diagram](img/diagram_img_npu.jpg)
+  ![MobileNet V1 NPU Pipeline Architecture Diagram](img/diagram_img_npu.png)
 - **Key Code Implementation Points**:
   - Optimized camera RGB565 frame conversions to the 224x224 RGB888 format expected by the model.
   - Integrated NPU driver initialization (`RM_ETHOSU_Open`) and coupled it with strict D-Cache maintenance operations (`SCB_CleanDCache_by_Addr` and `SCB_InvalidateDCache_by_Addr`) to prevent CPU-NPU data mismatch under Cortex-M85 caching.
@@ -328,7 +328,7 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 - **Overview**:
   Offloaded the YOLO-based object detection model (which takes ~2,090 ms on the CPU) to the Ethos-U55 NPU, squeezing latency down to **16 ms** and securing fluid face bounding-box overlays on the 60 Hz display.
   
-  ![YOLO Face Detection NPU/GPU Multitasking Flowchart](img/diagram_yolo_npu.jpg)
+  ![YOLO Face Detection NPU/GPU Multitasking Flowchart](img/diagram_yolo_npu.png)
 - **Key Code Implementation Points**:
   - Implemented an **asynchronous frame-skipping pipeline** governed by a state flag (`g_ai_task_busy`) to separate the 60 Hz display loop (`task_ui`) from the variable-rate AI task (`task_ai` / Priority 11).
   - Optimized the inverse quantization and coordinate mapping post-process (`yolo_face_postprocess`) to map the int8 quantization outputs back to physical display pixels quickly.
@@ -370,7 +370,7 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 - **Overview**:
   Validated the Edge Impulse FOMO model on the Ethos-U55 NPU to identify and count tiny components (Pico, Xiao, nRF54L15) and IC chips on PCBs in real-time.
   
-  ![FOMO Grid-Cell Based Detection Diagram](img/diagram_fomo_npu.jpg)
+  ![FOMO Grid-Cell Based Detection Diagram](img/diagram_fomo_npu.png)
 - **Key Code Implementation Points**:
   - Developed a fast post-processor (`fomo_postprocess`) that parses the grid-cell output tensors to extract and label coordinates of multiple components.
   - Strictly aligned the tensor arena in SRAM/SDRAM to the Cortex-M85 32-byte cache line limit via `BSP_ALIGN_VARIABLE(32)`, preventing neighboring memory blocks from getting corrupted during cache invalidations.
