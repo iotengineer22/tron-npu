@@ -2,10 +2,31 @@
 
 ![Project Cover Thumbnail](img/tron_face6.png)
 
-This repository houses the development project for the TRON Programming Contest 2026, utilizing the Renesas **EK-RA8P1** evaluation board (Cortex-M85 / Arm Ethos-U55 NPU / Dave2D GPU) and the **μT-Kernel 3.0** real-time OS.
-It achieves an ultra-fast, flicker-free real-time display and deterministic control by running camera capture, GPU rendering, and AI inference completely in parallel.
+This repository houses the development project for the TRON Programming Contest 2026, utilizing the Renesas **EK-RA8P1** evaluation board (Cortex-M85 / Arm Ethos-U55 NPU / Dave2D GPU) and the **μT-Kernel 3.0** real-time OS. It achieves an ultra-fast, flicker-free real-time display and deterministic control by running camera capture, GPU rendering, and AI inference completely in parallel.
+
+* **Contest Official Website**: [TRON Programming Contest 2026](https://www.tron.org/programming_contest/)
 
 📄 **[日本語版 (README.md)](README.md)**
+
+---
+
+## Repository Directory Layout
+
+The repository is organized into the following structure:
+
+```text
+tron-npu/
+├── src/                                 (Source code & e2 studio project folders)
+│   ├── tron_yolo_face_npu/              (YOLO Face Detection - NPU High-Speed Version)
+│   ├── tron_img_npu/                    (MobileNet Image Classification - NPU High-Speed Version)
+│   ├── tron_edge_fomo_npu_type/         (FOMO Component Detection - NPU High-Speed Version)
+│   └── ...                              (Comparison CPU versions and basic baseline projects)
+│
+├── debug/                               (Pre-built binaries for target flashing & manual)
+├── img/                                 (Image assets folder for manuals & documents)
+├── LICENSE.md                           (Software license and attribution credits)
+└── README.md                            (Japanese main document)
+```
 
 ---
 
@@ -34,9 +55,21 @@ This project combines μT-Kernel 3.0's priority-based multi-task scheduling with
 
 ---
 
-## 3. System Architecture
+## 3. How to Flash & Development Environment
 
-### 3-1. μT-Kernel 3.0 Multi-Task Scheduling (Parallel Pipeline)
+* **Integrated Development Environment (IDE)**: e2 studio (Renesas) / FSP v6.5.0 (or FSP v6.4.0)
+* **Real-Time OS (RTOS)**: μT-Kernel 3.0
+* **Target Board**: EK-RA8P1 Evaluation Board
+* **Build and Flashing Procedure**:
+  The system is built by importing the target projects into e2 studio.
+  **Pre-built SREC binary files for flashing and verification are located in the [/debug](debug/) folder.**
+  A comprehensive flashing manual containing step-by-step guides (including J-Link/SWD project configuration, target board connection, screen white-out freeze troubleshooting, flash memory initialization/erase, and COM port serial log check at 115200 bps) is located in **[/debug/README.md (Flashing Manual)](debug/README.md)**.
+
+---
+
+## 4. System Architecture
+
+### 4-1. μT-Kernel 3.0 Multi-Task Scheduling (Parallel Pipeline)
 The system divides its workload into two separate tasks running concurrently on the RTOS:
 
 ![μT-Kernel 3.0 Multi-Tasking & Dataflow Diagram](img/task_architecture.png)
@@ -46,7 +79,7 @@ The system divides its workload into two separate tasks running concurrently on 
 * **AI Inference Task (`task_ai` / Priority 11)**: 
   Manages preprocessing and runs model inference via the Arm Ethos-U55 NPU driver.
 
-### 3-2. Dave2D GPU & Ethos-U55 NPU Cooperative Sequence
+### 4-2. Dave2D GPU & Ethos-U55 NPU Cooperative Sequence
 To drive heavy AI inferences in the background without affecting the 60 Hz display refresh rate, the system coordinates the on-chip 2D GPU (Dave2D) and NPU using the following parallel pipeline:
 
 ![Parallel Pipeline Sequence Diagram](img/parallel_pipeline_architecture.png)
@@ -59,7 +92,7 @@ To drive heavy AI inferences in the background without affecting the 60 Hz displ
 
 This pipeline eliminates screen tearing and keeps the CPU free for other processes, yielding a smooth 60 Hz display alongside ultra-low latency AI detection.
 
-### 3-3. AI Inference Acceleration: CPU to NPU (Real-Time & Deterministic Control)
+### 4-3. AI Inference Acceleration: CPU to NPU (Real-Time & Deterministic Control)
 To objectively evaluate the processing capability of the NPU, **we developed and compiled alternative "CPU versions" of each application (running TFLite Micro strictly on the Cortex-M85 CPU without NPU acceleration) and conducted detailed benchmark measurements on the actual target board.**
 
 The benchmarks demonstrate that offloading heavy AI inference to the dedicated on-chip NPU accelerator achieves dramatic performance improvements compared to CPU-only execution. By outsourcing inference to the NPU, CPU utilization drops near zero, enabling the RTOS task scheduler to maintain strict, deterministic real-time control without display jitter.
@@ -73,9 +106,9 @@ The benchmarks demonstrate that offloading heavy AI inference to the dedicated o
 
 ---
 
-## 4. Sub-Project Directory List (under src)
+## 5. Sub-Project Directory List (under src)
 
-### 4-1. Firmware & Baseline Integration
+### 5-1. Firmware & Baseline Integration
 These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-CSI2 camera, and GLCDC screen flips) under μT-Kernel 3.0 task execution.
 
 | Folder | Application Role | Acceleration Engine (AI / Graphics) |
@@ -90,7 +123,7 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 | :---: | :---: |
 | [![Fast 2D Graphics Rendering](https://img.youtube.com/vi/kwVPgD5SHRA/hqdefault.jpg)](https://youtu.be/kwVPgD5SHRA)<br>[YouTube Link (https://youtu.be/kwVPgD5SHRA)](https://youtu.be/kwVPgD5SHRA) | [![Real-time MIPI Camera Stream](https://img.youtube.com/vi/Kv0S4wUMbmw/hqdefault.jpg)](https://youtu.be/Kv0S4wUMbmw)<br>[YouTube Link (https://youtu.be/Kv0S4wUMbmw)](https://youtu.be/Kv0S4wUMbmw) |
 
-### 4-2. Image Classification MobileNet V1
+### 5-2. Image Classification MobileNet V1
 Loads a downscaled camera frame into the neural network (MobileNet V1) to output the recognized object class.
 
 | Folder | Application Role | Acceleration Engine (AI / Graphics) |
@@ -102,7 +135,7 @@ Loads a downscaled camera frame into the neural network (MobileNet V1) to output
 [![Ethos-U55 NPU Image Processing Demo with RTOS](https://img.youtube.com/vi/FbrsUrJ6Ovw/hqdefault.jpg)](https://youtu.be/FbrsUrJ6Ovw)
 * [YouTube Link: Ethos-U55 NPU Image Processing Demo with RTOS](https://youtu.be/FbrsUrJ6Ovw)
 
-### 4-3. YOLO Face Detection
+### 5-3. YOLO Face Detection
 Detects human faces in real-time camera streams and overlays green bounding box frames.
 
 | Folder | Application Role | Acceleration Engine (AI / Graphics) |
@@ -114,7 +147,7 @@ Detects human faces in real-time camera streams and overlays green bounding box 
 [![High-speed YOLO Face Detection with Ethos-U55 NPU](https://img.youtube.com/vi/cH7dd1agzxg/hqdefault.jpg)](https://youtu.be/cH7dd1agzxg)
 * [YouTube Link: High-speed YOLO Face Detection with Ethos-U55 NPU](https://youtu.be/cH7dd1agzxg)
 
-### 4-4. PCB Component Detection (FOMO)
+### 5-4. PCB Component Detection (FOMO)
 Identifies and counts tiny electronic components (Pico, Xiao, nRF54L15) and IC chips on PCBs using the highly efficient Edge Impulse FOMO model.
 
 | Folder | Application Role | Acceleration Engine (AI / Graphics) |
@@ -129,7 +162,7 @@ Identifies and counts tiny electronic components (Pico, Xiao, nRF54L15) and IC c
 
 ---
 
-## 5. Sub-Project Key Implementations & Overview
+## 6. Sub-Project Key Implementations & Overview
 
 ### 1. Firmware Layer (Peripheral & RTOS Integration)
 These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-CSI2 camera, and GLCDC screen flips) under μT-Kernel 3.0 task execution.
@@ -407,17 +440,49 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
     Inference: 278 ms, Components Detected: Xiao (x:12, y:20, 92%), Pico (x:45, y:55, 89%)
   ```
 
----
-
-## 6. Development Environment & Execution
-* **Integrated Development Environment (IDE)**: e2 studio (Renesas) / FSP v6.5.0
-* **Real-Time OS (RTOS)**: μT-Kernel 3.0
-* **Target Board**: EK-RA8P1 Evaluation Board
-* **How to Build**: Run `build.bat` inside each program directory, or import the project into e2 studio. Connect to a serial terminal (115200 bps) to inspect initialization and real-time inference result logs.
+> [!NOTE]
+> **About Reference Program `tron_edge_fomo_ic`**
+> Although this repository includes a reference application **`tron_edge_fomo_ic`** to detect the number of black IC chips on a PCB, **its ML model is not fully optimized, resulting in suboptimal real-world detection accuracy.** Please understand this is provided strictly as a prototype reference for identifying specific IC geometries. For counting accuracy verification, please use our main project **`tron_edge_fomo_npu_type`** (Pico/Xiao detection).
 
 ---
 
-## 7. References
+## 7. Trial and Error in the Development Process & Future Challenges
+
+During the development of this project, we explored importing the latest object detection models and tackling high-difficulty tasks. However, due to hardware limitations of the MCU and compiler specifications, some attempts had to be abandoned. We record these trial-and-error processes here as future work.
+
+### 7-1. Compilation Limits and Errors in YOLOv11n (Nano)
+We attempted to run the latest ultra-lightweight object detection model, **YOLOv11n (Nano)**, on the target board, but could not deploy it due to the following issues in the Renesas development tools and MERA compiler.
+
+* **e² studio ONNX Quantization (MERA Compiler) Error**:
+  During ONNX-to-MERA format conversion and quantization, the following error was outputted:
+  ```text
+  RuntimeError: !missing: Missing quantization transform recipe(s) for nodes 
+  * _model_10_m_m_0_attn_MatMul_1_output_0_70386 [CanMatMul]
+  * _model_10_m_m_0_attn_MatMul_output_0_70383 [CanMatMul]
+  ```
+  * **Root Cause**: YOLOv11 introduces a new **Self-Attention (C2PSA) module** (Layer 10). The matrix multiplication (`MatMul`) operations inside this module are not yet supported by the Renesas MERA compiler (v2.6.0)'s quantization transform recipes.
+* **Crash during TFLite Deployment**:
+  When attempting to compile dynamic tensors around the Attention layer, memory allocation inconsistency occurred within MERA, resulting in a Windows Access Violation (buffer overrun `0xC0000409`) which aborted the compilation.
+
+### 7-2. YOLOv8n Adoption and Memory Capacity Limit
+To bypass the C2PSA Attention issue in YOLOv11n, we attempted to use **YOLOv8n**, which consists strictly of traditional convolutional layers.
+* **Result & Limitation**:
+  The model successfully compiled without any quantization limits, achieving a **100% NPU acceleration rate (0.0% CPU fallback)**.
+  However, the quantized model file size was **approximately 3.2 MB**. This vastly exceeded the physical **1 MB internal MRAM limit** of the EK-RA8P1 MCU, making it impossible to flash onto the target board alongside the core firmware (storing it in external QSPI flash and loading to SDRAM was abandoned due to boot speed and memory bus bandwidth bottlenecks).
+
+### 7-3. Accuracy Limits of IC Chip Detection with Open-Source Dataset
+In addition to general board component detection (Pico/Xiao), we attempted a more practical industrial task: "detecting and counting tiny IC chips on PCBs."
+* **Result & Limitation**:
+  We retrained a FOMO model using IC images from the Roboflow 100 [Printed Circuit Board Dataset](https://universe.roboflow.com/roboflow-100/printed-circuit-board), but the real-time detection accuracy on the actual board was extremely poor.
+  * **Root Cause**:
+    1. **Resolution Limitation**: At our target resolution (320x240) configured for camera acquisition and LCD synchronization, tiny IC chips (only a few millimeters wide) were captured with too few pixels, leaving features like labels or pin shapes indistinguishable for the model.
+    2. **Model Constraint**: Due to the memory limitations mentioned above, we could not run larger, higher-capacity object detection models on the MCU to resolve the fine-grained details.
+
+Ultimately, we optimized our deployment by using **YOLO-Fastest** (which offers an excellent balance of model size (~300KB) and inference speed/accuracy) and **FOMO** (specifically configured for Pico/Xiao detection under a clean white background).
+
+---
+
+## 8. References
 
 This project references and utilizes the following official sample codes and repositories:
 
@@ -427,3 +492,26 @@ This project references and utilizes the following official sample codes and rep
   * **[Renesas RA FSP Examples](https://github.com/renesas/ra-fsp-examples)** (GitHub) - Reference projects for `iic_master`, `glcdc`, `drw` (D/AVE 2D), and `mipi_csi` camera integration.
 * **Arm Ethos-U55 NPU AI Inference Integration**:
   * **[Renesas FSP (Flexible Software Package)](https://github.com/renesas/fsp)** (GitHub) - Driver stack (`r_ethosu`) and TensorFlow Lite Micro integration guides for the Arm Ethos-U55 NPU.
+
+---
+
+## 9. Software Licenses
+
+This repository contains components governed by multiple licenses (hybrid licensing structure) due to the integration of various third-party software libraries.
+
+* **Custom Application Code**: **MIT License**
+* **Real-Time OS (μT-Kernel 3.0)**: **T-License 2.2** (TRON Forum)
+* **Board Support Package (FSP/BSP)**: **Renesas FSP Software License** (Renesas Electronics)
+* **Edge Impulse SDK & AI/ML Libraries**: **Apache License 2.0**
+* **Training Dataset (Roboflow 100)**: **CC BY 4.0** (Creative Commons Attribution 4.0)
+
+> [!IMPORTANT]
+> For detailed terms, copyright notices, and dataset attributions, please refer to the **[LICENSE.md](LICENSE.md)** file in the root directory.
+
+---
+
+## 10. Acknowledgments
+
+We would like to express our deepest gratitude to the **TRON Forum** and **Renesas Electronics Corporation** for hosting this challenging and highly meaningful programming contest and for providing us with the necessary development hardware, including the high-performance EK-RA8P1 evaluation board and camera modules.
+
+Developing an edge AI image processing application accelerated by the Ethos-U55 NPU and Dave2D GPU on top of the highly reliable μT-Kernel 3.0 RTOS was an extremely exciting and valuable experience that demonstrated the true potential of modern embedded software engineering. We hope this project contributes to the advancement of edge AI systems and real-time OS technologies.
