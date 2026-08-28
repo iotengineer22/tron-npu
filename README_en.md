@@ -222,9 +222,6 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
   }
   ```
 
-    | I2C Diagnostics Real Photo (1) | I2C Diagnostics Real Photo (2) |
-    | :---: | :---: |
-    | ![tron_i2c3](img/tron_i2c3.png) | ![tron_i2c4](img/tron_i2c4.png) |
 
 * **Serial Print Log**:
   Confirming the successful query of OV5640's unique Product ID High/Low registers returning `0x56` and `0x40`:
