@@ -9,6 +9,34 @@
 
 ---
 
+## リポジトリのフォルダ構成
+
+本リポジトリは、以下のような構成でソースコードや書き込み用のバイナリが整理されています。
+
+```text
+tron-npu/
+├── src/                                 (開発ソースコード・e2 studioプロジェクトフォルダ)
+│   ├── tron_yolo_face_npu/              (YOLO顔検出 NPU高速版)
+│   ├── tron_img_npu/                    (MobileNet画像分類 NPU高速版)
+│   ├── tron_edge_fomo_npu_type/         (FOMO部品検出 NPU高速版)
+│   └── ...                              (比較用のCPU版や各種基礎ファームウェアプロジェクト)
+│
+├── debug/                               (実機書き込み用ビルド済みバイナリ集約フォルダ)
+│   ├── README.md                        (図解付きのRFP書き込み手順書・マニュアル)
+│   ├── tron_yolo_face_npu.srec          (YOLO顔検出 NPU高速版 SREC)
+│   ├── tron_img_npu.srec                (MobileNet画像分類 NPU高速版 SREC)
+│   ├── tron_edge_fomo_npu_type.srec    (FOMO部品検出 NPU高速版 SREC)
+│   └── ...                              (サブフォルダに各種CPU版や基礎ファームウェアを格納)
+│
+├── img/                                 (マニュアル・ドキュメント用画像アセットフォルダ)
+│
+├── LICENSE.md                           (ソフトウェアライセンスおよび引用クレジット表記)
+├── collect_binaries.py / .bat           (最新ビルドバイナリの自動集約スクリプト)
+└── README.md                            (本ドキュメント)
+```
+
+---
+
 ## 1. システム概要
 
 本システムは、MIPI-CSI2カメラ（OV5640）からリアルタイムに入力される動画像に対して、物体検出（YOLO-Fastest、FOMO）および画像分類（MobileNet V1）などの深層学習モデルによる推論を実行し、ディスプレイ（1024x600 TFT）へリアルタイムに結果を重ね描きして出力するスマートエッジデバイス・アプリケーションです。
