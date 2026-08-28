@@ -140,15 +140,17 @@ YOLOやMobileNetなどの容量の大きいプログラムを書き込む際、�
 * **動作概略**: カメラのリアルタイム動画像から人物の顔を検出し、その位置に緑色のバウンディングボックス（顔枠）を重ね描きします。
 * **特徴**: 通常CPU実行で約2秒（2,090ms）かかる重い推論処理を、 Ethos-U55 NPU へオフロードすることで **約16ms** へと劇的に高速化。60Hzの画面更新を阻害せずに滑らかに追従します。
 * **実機デモ動画**:
-  [![High-speed YOLO Face Detection with Ethos-U55 NPU](https://img.youtube.com/vi/cH7dd1agzxg/hqdefault.jpg)](https://youtu.be/cH7dd1agzxg)
   * [YouTubeリンク (https://youtu.be/cH7dd1agzxg)](https://youtu.be/cH7dd1agzxg)
+  
+  [![High-speed YOLO Face Detection with Ethos-U55 NPU](https://img.youtube.com/vi/cH7dd1agzxg/hqdefault.jpg)](https://youtu.be/cH7dd1agzxg)
 
 ### ② MobileNet画像分類 NPU高速版 (`tron_img_npu.srec`)
 * **動作概略**: カメラに写った物体の特徴を分析し、それが何であるか（マウス、キーボードなど）を推論して、判定されたクラス名と確率（%）を画面にリアルタイム表示します。
 * **特徴**: 通常CPU実行で約1.5秒（1,512ms）要する推論処理を、NPUによって **約17ms** に短縮し、チラつきのない快適な分類処理を実現しています。
 * **実機デモ動画**:
-  [![Ethos-U55 NPU Image Processing Demo with RTOS](https://img.youtube.com/vi/FbrsUrJ6Ovw/hqdefault.jpg)](https://youtu.be/FbrsUrJ6Ovw)
   * [YouTubeリンク (https://youtu.be/FbrsUrJ6Ovw)](https://youtu.be/FbrsUrJ6Ovw)
+  
+  [![Ethos-U55 NPU Image Processing Demo with RTOS](https://img.youtube.com/vi/FbrsUrJ6Ovw/hqdefault.jpg)](https://youtu.be/FbrsUrJ6Ovw)
 
 ### ③ FOMO基板部品検出 NPU高速版 (`tron_edge_fomo_npu_type.srec`)
 * **動作概略**: 電子基板上の極小の部品（Raspberry Pi Pico、Seeed Studio Xiao、nRF54L15など）をリアルタイムに同時識別し、個数と位置をラベル付きで検出・カウントします。
@@ -162,8 +164,9 @@ YOLOやMobileNetなどの容量の大きいプログラムを書き込む際、�
   > ![FOMO動作確認用テストボード](../img/tron_debug10.jpg)
 * **特徴**: 通常CPUで 278ms かかる推論を、NPUを用いて **約5ms** へと超高速化。複数オブジェクトの瞬間的なカウント追従を実現しています。
 * **実機デモ動画**:
-  [![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/_uKRamoLaNA/hqdefault.jpg)](https://youtu.be/_uKRamoLaNA)
   * [YouTubeリンク (https://youtu.be/_uKRamoLaNA)](https://youtu.be/_uKRamoLaNA)
+  
+  [![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/_uKRamoLaNA/hqdefault.jpg)](https://youtu.be/_uKRamoLaNA)
 
 ---
 
@@ -191,14 +194,16 @@ AI機能を含まない、液晶描画、カメラデータ同期、I2Cなどの
   * **バイナリパス**: [base_firmware/tron_d2_test.srec](base_firmware/tron_d2_test.srec)
   * **動作概略**: μT-Kernel 3.0 のVblank同期起床（CPU 0%）により、液晶ディスプレイへDave2D GPUを用いたバウンドする球体のちらつきのない描画テストを行います。
   * **実機デモ動画**:
-    [![Fast 2D Graphics Rendering](https://img.youtube.com/vi/kwVPgD5SHRA/hqdefault.jpg)](https://youtu.be/kwVPgD5SHRA)
     * [YouTubeリンク (https://youtu.be/kwVPgD5SHRA)](https://youtu.be/kwVPgD5SHRA)
+    
+    [![Fast 2D Graphics Rendering](https://img.youtube.com/vi/kwVPgD5SHRA/hqdefault.jpg)](https://youtu.be/kwVPgD5SHRA)
 * **カメラライブ映像ダイレクト表示**
   * **バイナリパス**: [base_firmware/tron_mipi_test_ori.srec](base_firmware/tron_mipi_test_ori.srec)
   * **動作概略**: MIPI-CSI2カメラからキャプチャしたライブ映像を、GPUで画面サイズへバイリニア補間拡大しながら液晶へ同期遅延なしでリアルタイム表示します。
   * **実機デモ動画**:
-    [![Real-time MIPI Camera Stream](https://img.youtube.com/vi/Kv0S4wUMbmw/hqdefault.jpg)](https://youtu.be/Kv0S4wUMbmw)
     * [YouTubeリンク (https://youtu.be/Kv0S4wUMbmw)](https://youtu.be/Kv0S4wUMbmw)
+    
+    [![Real-time MIPI Camera Stream](https://img.youtube.com/vi/Kv0S4wUMbmw/hqdefault.jpg)](https://youtu.be/Kv0S4wUMbmw)
 * **シリアル並行出力検証**
   * **バイナリパス**: [base_firmware/tron_serial_test.srec](base_firmware/tron_serial_test.srec)
   * **動作概略**: 2つのタスクから同時にT-Monitor APIを介してシリアル（UART）へ出力を行い、RTOSの優先度ベース・並行動作制御を検証します。
