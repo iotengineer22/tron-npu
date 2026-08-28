@@ -38,8 +38,12 @@ tron-npu/
 This system captures real-time video streams from a MIPI-CSI2 camera (OV5640), performs inference using deep learning models (YOLO-Fastest, FOMO) for object and face detection, and overlays the detection bounding boxes onto a TFT LCD panel (1024x600 resolution) using high-speed vector graphics.
 
 ### "TRON × AI" Synergy
-A major bottleneck in embedded AI is that neural network inference (heavy matrix calculations) can occupy the CPU for extended periods, causing display lag (jitter) or missed sensor events.
-This project combines μT-Kernel 3.0's priority-based multi-task scheduling with dedicated hardware accelerators (NPU/GPU) to solve this bottleneck. We successfully maintain **fluid display rendering (60 Hz)** while running **background AI inferences (taking only a few milliseconds)**, demonstrating a highly practical, low-latency AI edge application.
+A major bottleneck in embedded AI is that neural network inference (heavy matrix calculations) can occupy the CPU for extended periods,
+causing display lag (jitter) or missed sensor events.
+
+This project combines μT-Kernel 3.0's priority-based multi-task scheduling with dedicated hardware accelerators (NPU/GPU) to solve this bottleneck.
+We successfully maintain **fluid display rendering (60 Hz)** while running **background AI inferences (taking only a few milliseconds)**,
+demonstrating a highly practical, low-latency AI edge application.
 
 ---
 
@@ -66,7 +70,10 @@ This project combines μT-Kernel 3.0's priority-based multi-task scheduling with
 * **Build and Flashing Procedure**:
   The system is built by importing the target projects into e2 studio.
   **Pre-built SREC binary files for flashing and verification are located in the [/debug](debug/) folder.**
-  A comprehensive flashing manual containing step-by-step guides (including J-Link/SWD project configuration, target board connection, screen white-out freeze troubleshooting, flash memory initialization/erase, and COM port serial log check at 115200 bps) is located in **[/debug/README.md (Flashing Manual)](debug/README.md)**.
+
+  A comprehensive flashing manual containing step-by-step guides (including J-Link/SWD project configuration, target board connection,
+  screen white-out freeze troubleshooting, flash memory initialization/erase, and COM port serial log check at 115200 bps)
+  is located in **[/debug/README.md (Flashing Manual)](debug/README.md)**.
 
 ---
 
@@ -98,7 +105,11 @@ This pipeline eliminates screen tearing and keeps the CPU free for other process
 ### 4-3. AI Inference Acceleration: CPU to NPU (Real-Time & Deterministic Control)
 To objectively evaluate the processing capability of the NPU, **we developed and compiled alternative "CPU versions" of each application (running TFLite Micro strictly on the Cortex-M85 CPU without NPU acceleration) and conducted detailed benchmark measurements on the actual target board.**
 
-The benchmarks demonstrate that offloading heavy AI inference to the dedicated on-chip NPU accelerator achieves dramatic performance improvements compared to CPU-only execution. By outsourcing inference to the NPU, CPU utilization drops near zero, enabling the RTOS task scheduler to maintain strict, deterministic real-time control without display jitter.
+The benchmarks demonstrate that offloading heavy AI inference to the dedicated on-chip NPU accelerator
+achieves dramatic performance improvements compared to CPU-only execution.
+
+By outsourcing inference to the NPU, CPU utilization drops near zero,
+enabling the RTOS task scheduler to maintain strict, deterministic real-time control without display jitter.
 
 * **NPU Acceleration Effects (Actual Benchmarks: CPU-only vs NPU)**:
   * **MobileNet V1 Image Classification**: Reduced latency from 1,512 ms on the CPU to **17 ms (an ~88.9x speedup)**.
@@ -124,7 +135,7 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
 **Demo Video:**
 | Fast 2D Graphics Rendering on EK-RA8P1 with RTOS | Real-time MIPI Camera Stream to LCD on EK-RA8P1 |
 | :---: | :---: |
-| [![Fast 2D Graphics Rendering](https://img.youtube.com/vi/kwVPgD5SHRA/hqdefault.jpg)](https://youtu.be/kwVPgD5SHRA)<br>[YouTube Link (https://youtu.be/kwVPgD5SHRA)](https://youtu.be/kwVPgD5SHRA) | [![Real-time MIPI Camera Stream](https://img.youtube.com/vi/Kv0S4wUMbmw/hqdefault.jpg)](https://youtu.be/Kv0S4wUMbmw)<br>[YouTube Link (https://youtu.be/Kv0S4wUMbmw)](https://youtu.be/Kv0S4wUMbmw) |
+| [YouTube Link (https://youtu.be/kwVPgD5SHRA)](https://youtu.be/kwVPgD5SHRA)<br><br>[![Fast 2D Graphics Rendering](https://img.youtube.com/vi/kwVPgD5SHRA/hqdefault.jpg)](https://youtu.be/kwVPgD5SHRA) | [YouTube Link (https://youtu.be/Kv0S4wUMbmw)](https://youtu.be/Kv0S4wUMbmw)<br><br>[![Real-time MIPI Camera Stream](https://img.youtube.com/vi/Kv0S4wUMbmw/hqdefault.jpg)](https://youtu.be/Kv0S4wUMbmw) |
 
 ### 5-2. Image Classification MobileNet V1
 Loads a downscaled camera frame into the neural network (MobileNet V1) to output the recognized object class.
@@ -135,8 +146,9 @@ Loads a downscaled camera frame into the neural network (MobileNet V1) to output
 | **[tron_img_npu](src/tron_img_npu)** | MobileNet V1 Image Classification on NPU | **Arm Ethos-U55 NPU** / Dave2D |
 
 **Demo Video:**
-[![Ethos-U55 NPU Image Processing Demo with RTOS](https://img.youtube.com/vi/FbrsUrJ6Ovw/hqdefault.jpg)](https://youtu.be/FbrsUrJ6Ovw)
 * [YouTube Link: Ethos-U55 NPU Image Processing Demo with RTOS](https://youtu.be/FbrsUrJ6Ovw)
+
+[![Ethos-U55 NPU Image Processing Demo with RTOS](https://img.youtube.com/vi/FbrsUrJ6Ovw/hqdefault.jpg)](https://youtu.be/FbrsUrJ6Ovw)
 
 ### 5-3. YOLO Face Detection
 Detects human faces in real-time camera streams and overlays green bounding box frames.
@@ -147,8 +159,9 @@ Detects human faces in real-time camera streams and overlays green bounding box 
 | **[tron_yolo_face_npu](src/tron_yolo_face_npu)** | YOLO Face Detection on NPU | **Arm Ethos-U55 NPU** / Dave2D |
 
 **Demo Video:**
-[![High-speed YOLO Face Detection with Ethos-U55 NPU](https://img.youtube.com/vi/cH7dd1agzxg/hqdefault.jpg)](https://youtu.be/cH7dd1agzxg)
 * [YouTube Link: High-speed YOLO Face Detection with Ethos-U55 NPU](https://youtu.be/cH7dd1agzxg)
+
+[![High-speed YOLO Face Detection with Ethos-U55 NPU](https://img.youtube.com/vi/cH7dd1agzxg/hqdefault.jpg)](https://youtu.be/cH7dd1agzxg)
 
 ### 5-4. PCB Component Detection (FOMO)
 Identifies and counts tiny electronic components (Pico, Xiao, nRF54L15) and IC chips on PCBs using the highly efficient Edge Impulse FOMO model.
@@ -160,8 +173,9 @@ Identifies and counts tiny electronic components (Pico, Xiao, nRF54L15) and IC c
 | **[tron_edge_fomo_ic](src/tron_edge_fomo_ic)** (Reference) | IC chip detection on NPU (Reference) | **Arm Ethos-U55 NPU** / Dave2D |
 
 **Demo Video:**
-[![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/_uKRamoLaNA/hqdefault.jpg)](https://youtu.be/_uKRamoLaNA)
 * [YouTube Link: PCB Object Detection using Ethos-U55 NPU](https://youtu.be/_uKRamoLaNA)
+
+[![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/_uKRamoLaNA/hqdefault.jpg)](https://youtu.be/_uKRamoLaNA)
 
 ---
 

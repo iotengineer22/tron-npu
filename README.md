@@ -37,8 +37,14 @@ tron-npu/
 本システムは、MIPI-CSI2カメラ（OV5640）からリアルタイムに入力される動画像に対して、物体検出（YOLO-Fastest、FOMO）および画像分類（MobileNet V1）などの深層学習モデルによる推論を実行し、ディスプレイ（1024x600 TFT）へリアルタイムに結果を重ね描きして出力するスマートエッジデバイス・アプリケーションです。
 
 ### 「TRON×AI」の親和性
-組み込みAIにおける最大の課題は、AI推論（重い行列演算）がCPUパワーを長時間占有してしまい、画面表示のガクつき（ジッタ）や、センサー監視の取りこぼしを引き起こす点にあります。
-本システムでは、μT-Kernel 3.0 の優先度ベースのマルチタスクスケジューリングと、独立した専用アクセラレータ（NPU/GPU）を組み合わせることで、**「UI/カメラ表示の応答性（60Hz）の完全維持」** と **「推論のバックグラウンド実行（数ms〜数十ms）」** の両立を可能とし、極めて実用的で低遅延なリアルタイムAIエッジアプリケーションを実証しました。
+組み込みAIにおける最大の課題は、AI推論（重い行列演算）がCPUパワーを長時間占有してしまい、
+画面表示のガクつき（ジッタ）や、センサー監視の取りこぼしを引き起こす点にあります。
+
+本システムでは、μT-Kernel 3.0 の優先度ベースのマルチタスクスケジューリングと、
+独立した専用アクセラレータ（NPU/GPU）を組み合わせることで、
+**「UI/カメラ表示の応答性（60Hz）の完全維持」** と
+**「推論のバックグラウンド実行（数ms〜数十ms）」** の両立を可能とし、
+極めて実用的で低遅延なリアルタイムAIエッジアプリケーションを実証しました。
 
 ---
 
@@ -65,8 +71,13 @@ tron-npu/
 * **実行環境**: EK-RA8P1 評価ボード
 * **ビルドと実行手順**:
   本システムのビルドは e2 studio 上で対象プロジェクトをインポートして行います。
-  なお、**実機評価テスト用のビルド済み書き込み用バイナリ（SREC）は、すべて [/debug](debug/) フォルダに整理されて配置されています。**
-  ツールの入手方法、配線接続、液晶フリーズ対策、デバイスの初期化（アドレスエラー回避）、および動作シリアルログ（115200 bps）の確認手順を含む詳細な実行マニュアルは、**[/debug/README.md (書き込み手順書)](debug/README.md)** に画像付きで詳しく記載されていますので、動作確認の際はそちらをご参照ください。
+  なお、**実機評価テスト用のビルド済み書き込み用バイナリ（SREC）は、
+  すべて [/debug](debug/) フォルダに整理されて配置されています。**
+
+  ツールの入手方法、配線接続、液晶フリーズ対策、デバイスの初期化（アドレスエラー回避）、
+  および動作シリアルログ（115200 bps）の確認手順を含む詳細な実行マニュアルは、
+  **[/debug/README.md (書き込み手順書)](debug/README.md)** に画像付きで詳しく記載されていますので、
+  動作確認の際はそちらをご参照ください。
 
 ---
 
@@ -98,7 +109,11 @@ tron-npu/
 ### 5-3. CPUからNPUへのAI推論高速化（リアルタイム性能と決定論的制御）
 本プロジェクトでは、NPUによる処理能力を客観的に評価するため、**NPUアクセラレータを使用せずにCortex-M85 CPU単体（TFLite Micro CPU実行）で推論を行う「CPU版プログラム」も並行して開発・ビルドし、実機上での詳細なベンチマーク測定を実施しました。**
 
-これにより、重いAI推論処理をマイコン内蔵の専用アクセラレータ（NPU）へオフロードすることで、CPU単体での演算実行時に比べて圧倒的なリアルタイム性能向上を達成していることを証明しました。NPUへの処理委託によってCPU負荷がほぼゼロになり、RTOSのスレッドスケジュール機能が活き、決定論的なリアルタイム制御を極めて容易に実現できます。
+これにより、重いAI推論処理をマイコン内蔵の専用アクセラレータ（NPU）へオフロードすることで、
+CPU単体での演算実行時に比べて圧倒的なリアルタイム性能向上を達成していることを証明しました。
+
+NPUへの処理委託によってCPU負荷がほぼゼロになり、RTOSのスレッドスケジュール機能が活き、
+決定論的なリアルタイム制御を極めて容易に実現できます。
 
 * **実機測定によるNPU高速化ベンチマーク効果 (CPU実行 vs NPU実行)**:
   * **MobileNet V1 画像分類**: CPU上で約1.5秒（1,512ms）かかっていた推論を **約 17 ms（約88.9倍の高速化）** に短縮。
@@ -124,7 +139,7 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 **デモ動画:**
 | Fast 2D Graphics Rendering on EK-RA8P1 with RTOS | Real-time MIPI Camera Stream to LCD on EK-RA8P1 |
 | :---: | :---: |
-| [![Fast 2D Graphics Rendering](https://img.youtube.com/vi/kwVPgD5SHRA/hqdefault.jpg)](https://youtu.be/kwVPgD5SHRA)<br>[YouTubeリンク (https://youtu.be/kwVPgD5SHRA)](https://youtu.be/kwVPgD5SHRA) | [![Real-time MIPI Camera Stream](https://img.youtube.com/vi/Kv0S4wUMbmw/hqdefault.jpg)](https://youtu.be/Kv0S4wUMbmw)<br>[YouTubeリンク (https://youtu.be/Kv0S4wUMbmw)](https://youtu.be/Kv0S4wUMbmw) |
+| [YouTubeリンク (https://youtu.be/kwVPgD5SHRA)](https://youtu.be/kwVPgD5SHRA)<br><br>[![Fast 2D Graphics Rendering](https://img.youtube.com/vi/kwVPgD5SHRA/hqdefault.jpg)](https://youtu.be/kwVPgD5SHRA) | [YouTubeリンク (https://youtu.be/Kv0S4wUMbmw)](https://youtu.be/Kv0S4wUMbmw)<br><br>[![Real-time MIPI Camera Stream](https://img.youtube.com/vi/Kv0S4wUMbmw/hqdefault.jpg)](https://youtu.be/Kv0S4wUMbmw) |
 
 ### 5-2. 画像分類 MobileNet V1
 入力画像のサイズ変換を行い、ニューラルネットワーク（MobileNet V1）を用いて写っている物体のカテゴリを分類するAIプログラム群です。
@@ -135,8 +150,9 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 | **[tron_img_npu](src/tron_img_npu)** | MobileNet V1 画像分類 NPU版 | **Arm Ethos-U55 NPU** / Dave2D |
 
 **デモ動画:**
-[![Ethos-U55 NPU Image Processing Demo with RTOS](https://img.youtube.com/vi/FbrsUrJ6Ovw/hqdefault.jpg)](https://youtu.be/FbrsUrJ6Ovw)
 * [YouTubeリンク: Ethos-U55 NPU Image Processing Demo with RTOS](https://youtu.be/FbrsUrJ6Ovw)
+
+[![Ethos-U55 NPU Image Processing Demo with RTOS](https://img.youtube.com/vi/FbrsUrJ6Ovw/hqdefault.jpg)](https://youtu.be/FbrsUrJ6Ovw)
 
 ### 5-3. YOLO顔検出
 カメラのリアルタイム画像から人物の顔を認識し、その座標に緑色の検出枠を重ねて表示する物体検出プログラム群です。
@@ -147,8 +163,9 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 | **[tron_yolo_face_npu](src/tron_yolo_face_npu)** | YOLO顔検出 NPU高速版 | **Arm Ethos-U55 NPU** / Dave2D |
 
 **デモ動画:**
-[![High-speed YOLO Face Detection with Ethos-U55 NPU](https://img.youtube.com/vi/cH7dd1agzxg/hqdefault.jpg)](https://youtu.be/cH7dd1agzxg)
 * [YouTubeリンク: High-speed YOLO Face Detection with Ethos-U55 NPU](https://youtu.be/cH7dd1agzxg)
+
+[![High-speed YOLO Face Detection with Ethos-U55 NPU](https://img.youtube.com/vi/cH7dd1agzxg/hqdefault.jpg)](https://youtu.be/cH7dd1agzxg)
 
 ### 5-4. PCB部品検出 (FOMO)
 基板上の極小の電子部品（Pico、Xiao、nRF54L15など）やICチップなどの特定オブジェクトをリアルタイムに検出し、カウントする高精度・軽量物体検出AIプログラム群です。
@@ -160,8 +177,9 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
 | **[tron_edge_fomo_ic](src/tron_edge_fomo_ic)** (参考) | ICチップ検出 NPU高速版（参考） | **Arm Ethos-U55 NPU** / Dave2D |
 
 **デモ動画:**
-[![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/_uKRamoLaNA/hqdefault.jpg)](https://youtu.be/_uKRamoLaNA)
 * [YouTubeリンク: PCB Object Detection using Ethos-U55 NPU](https://youtu.be/_uKRamoLaNA)
+
+[![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/_uKRamoLaNA/hqdefault.jpg)](https://youtu.be/_uKRamoLaNA)
 
 ---
 
