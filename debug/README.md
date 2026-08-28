@@ -144,7 +144,7 @@ YOLOやMobileNetなどの容量の大きいプログラムを書き込む際、�
   * [YouTubeリンク (https://youtu.be/cH7dd1agzxg)](https://youtu.be/cH7dd1agzxg)
 
 ### ② MobileNet画像分類 NPU高速版 (`tron_img_npu.srec`)
-* **動作概略**: カメラに写った物体の特徴を分析し、それが何であるか（マグカップ、キーボードなど）を推論して、判定されたクラス名と確率（%）を画面にリアルタイム表示します。
+* **動作概略**: カメラに写った物体の特徴を分析し、それが何であるか（マウス、キーボードなど）を推論して、判定されたクラス名と確率（%）を画面にリアルタイム表示します。
 * **特徴**: 通常CPU実行で約1.5秒（1,512ms）要する推論処理を、NPUによって **約17ms** に短縮し、チラつきのない快適な分類処理を実現しています。
 * **実機デモ動画**:
   [![Ethos-U55 NPU Image Processing Demo with RTOS](https://img.youtube.com/vi/FbrsUrJ6Ovw/hqdefault.jpg)](https://youtu.be/FbrsUrJ6Ovw)
@@ -152,6 +152,11 @@ YOLOやMobileNetなどの容量の大きいプログラムを書き込む際、�
 
 ### ③ FOMO基板部品検出 NPU高速版 (`tron_edge_fomo_npu_type.srec`)
 * **動作概略**: 電子基板上の極小の部品（Raspberry Pi Pico、Seeed Studio Xiao、nRF54L15など）をリアルタイムに同時識別し、個数と位置をラベル付きで検出・カウントします。
+  > [!NOTE]
+  > **確認用テスト基板の同梱について**
+  > 本プログラムの検出・カウント動作テスト用として、下図の **「確認用のRaspberry Pi PicoおよびSeeed Studio Xiaoが配置されたテストボード」** を評価ボード一式に同封しております。カメラをこのテストボードに向けていただくことで、自動検出とカウントデモをその場でお試しいただけます。
+  >
+  > ![FOMO動作確認用テストボード](../img/tron_debug10.jpg)
 * **特徴**: 通常CPUで 278ms かかる推論を、NPUを用いて **約5ms** へと超高速化。複数オブジェクトの瞬間的なカウント追従を実現しています。
 * **実機デモ動画**:
   [![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/_uKRamoLaNA/hqdefault.jpg)](https://youtu.be/_uKRamoLaNA)
