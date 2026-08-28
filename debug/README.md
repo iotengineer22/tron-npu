@@ -5,7 +5,7 @@
 > [!NOTE]
 > **動作対象ボードに関する重要なお知らせ**
 > * 本フォルダ内のプログラムによる動作確認作業は、**「EK-RA8P1 評価ボード単体」のみで十分に可能**です。
-> * なお、別部門の応募において、下図のように**「I2Cセンサー（加速度センサーや配線など）が接続された状態のボード」**を事務局に提出しておりますが、**そのセンサー付きボードでも、気にせずそのままテスト（書き込み・実行）を行っていただけます。**（接続されているセンサーや配線が、各プログラム of 動作や書き込みに悪影響や干渉を与えることはございません）
+> * なお、別部門の応募において、下図のように**「I2Cセンサー（加速度センサーや配線など）が接続された状態のボード」**を事務局に提出しておりますが、**そのセンサー付きボードでも、気にせずそのままテスト（書き込み・実行）を行っていただけます。**（接続されているセンサーや配線が、各プログラムの動作や書き込みに悪影響や干渉を与えることはございません）
 >
 > ![センサー接続状態のボード外観](../img/tron_debug7.jpg)
 
@@ -61,7 +61,7 @@ PCとボードを接続し、プロジェクトを作成してプログラムを
 ### ② プロジェクトの作成と設定
 
 1. インストールした **Renesas Flash Programmer (RFP)** を起動します。
-2. メニューの **[ファイル] ➡ [新しいプロジェクトの作成...]** を選択し、表示されるダイアログを以下のように設定します。
+2. メニュー of **[ファイル] ➡ [新しいプロジェクトの作成...]** を選択し、表示されるダイアログを以下のように設定します。
 
 | 設定項目 | 設定値 |
 | :--- | :--- |
@@ -134,7 +134,7 @@ YOLOやMobileNetなどの容量の大きいプログラムを書き込む際、�
 
 ## 4. 代表的なプログラムの概要とデモ動画
 
-書き込み完了後、以下の3つの代表的なプログラムの動作概要と実機デモ動画をご確認いただけます。それぞれオンチップ of NPU（Neural Processing Unit）を用いることで、ミリ秒単位の超高速なAI推論処理を実行します。
+書き込み完了後、以下の3つの代表的なプログラムの動作概要と実機デモ動画をご確認いただけます。それぞれオンチップのNPU（Neural Processing Unit）を用いることで、ミリ秒単位の超高速なAI推論処理を実行します。
 
 ### ① YOLO顔検出 NPU高速版 (`tron_yolo_face_npu.srec`)
 * **動作概略**: カメラのリアルタイム動画像から人物の顔を検出し、その位置に緑色のバウンディングボックス（顔枠）を重ね描きします。
@@ -161,3 +161,44 @@ YOLOやMobileNetなどの容量の大きいプログラムを書き込む際、�
 * **実機デモ動画**:
   [![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/_uKRamoLaNA/hqdefault.jpg)](https://youtu.be/_uKRamoLaNA)
   * [YouTubeリンク (https://youtu.be/_uKRamoLaNA)](https://youtu.be/_uKRamoLaNA)
+
+---
+
+## 5. (参考) CPU通常版および基本周辺機能検証プログラム
+
+上記NPU高速版との「性能差・高速効果の比較検証」を行うための**CPU通常版AIプログラム**、およびシステムの土台となる**基本ペリフェラル検証用プログラム**です。実施内容は上記NPU版と同様ですが、参考情報として動作・確認いただけます。
+
+### A. NPU高速化効果の比較用：CPU通常版AIプログラム
+動作内容および液晶画面への表示内容はNPU高速版と全く同じですが、オンチップNPUを使用せず、メインCPU（Cortex-M85）上でAI推論をすべて実行します。推論速度の違いを測定・体験するために使用します。
+
+* **YOLO顔検出 CPU通常版**
+  * **バイナリパス**: [cpu_ai_versions/tron_yolo_face_cpu.srec](cpu_ai_versions/tron_yolo_face_cpu.srec)
+  * **比較**: NPU版の **約16ms** に対し、CPU版では **約2,090ms (約2.09秒)** かかります。これにより、顔追従の遅延や、RTOSマルチタスクにおけるCPU占有負荷の違いを視覚的に比較できます。
+* **MobileNet画像分類 CPU通常版**
+  * **バイナリパス**: [cpu_ai_versions/tron_img_cpu.srec](cpu_ai_versions/tron_img_cpu.srec)
+  * **比較**: NPU版の **約17ms** に対し、CPU版では **約1,512ms (約1.51秒)** かかります。
+* **FOMO基板部品検出 CPU通常版**
+  * **バイナリパス**: [cpu_ai_versions/tron_edge_fomo_cpu_type.srec](cpu_ai_versions/tron_edge_fomo_cpu_type.srec)
+  * **比較**: NPU版の **約5ms** に対し、CPU版では **約278ms** かかります。
+
+### B. 基礎ペリフェラル・RTOS機能検証用プログラム
+AI機能を含まない、液晶描画、カメラデータ同期、I2Cなどの基本周辺機能の単体動作検証プログラムです。
+
+* **液晶描画・Dave2D GPU & SDRAM検証**
+  * **バイナリパス**: [base_firmware/tron_d2_test.srec](base_firmware/tron_d2_test.srec)
+  * **動作概略**: μT-Kernel 3.0 のVblank同期起床（CPU 0%）により、液晶ディスプレイへDave2D GPUを用いたバウンドする球体のちらつきのない描画テストを行います。
+  * **実機デモ動画**:
+    [![Fast 2D Graphics Rendering](https://img.youtube.com/vi/kwVPgD5SHRA/hqdefault.jpg)](https://youtu.be/kwVPgD5SHRA)
+    * [YouTubeリンク (https://youtu.be/kwVPgD5SHRA)](https://youtu.be/kwVPgD5SHRA)
+* **カメラライブ映像ダイレクト表示**
+  * **バイナリパス**: [base_firmware/tron_mipi_test_ori.srec](base_firmware/tron_mipi_test_ori.srec)
+  * **動作概略**: MIPI-CSI2カメラからキャプチャしたライブ映像を、GPUで画面サイズへバイリニア補間拡大しながら液晶へ同期遅延なしでリアルタイム表示します。
+  * **実機デモ動画**:
+    [![Real-time MIPI Camera Stream](https://img.youtube.com/vi/Kv0S4wUMbmw/hqdefault.jpg)](https://youtu.be/Kv0S4wUMbmw)
+    * [YouTubeリンク (https://youtu.be/Kv0S4wUMbmw)](https://youtu.be/Kv0S4wUMbmw)
+* **シリアル並行出力検証**
+  * **バイナリパス**: [base_firmware/tron_serial_test.srec](base_firmware/tron_serial_test.srec)
+  * **動作概略**: 2つのタスクから同時にT-Monitor APIを介してシリアル（UART）へ出力を行い、RTOSの優先度ベース・並行動作制御を検証します。
+* **カメラI2C接続診断**
+  * **バイナリパス**: [base_firmware/tron_i2c_test.srec](base_firmware/tron_i2c_test.srec)
+  * **動作概略**: MIPIカメラとのI2Cバス通信を介して、カメラモジュール（OV5640）の固有IDの読み出し診断を行います。
