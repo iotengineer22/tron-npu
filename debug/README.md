@@ -1,6 +1,6 @@
 # EK-RA8P1 書き込み用バイナリフォルダ (debug)
 
-本フォルダは、μT-Kernel 3.0 および各種エッジAIプログラムを Renesas EK-RA8P1 評価ボードへ書き込むためのバイナリファイル（`.srec` および `.elf`）を集約・整理したフォルダです。
+本フォルダ is、μT-Kernel 3.0 および各種エッジAIプログラムを Renesas EK-RA8P1 評価ボードへ書き込むためのバイナリファイル（`.srec` および `.elf`）を集約・整理したフォルダです。
 
 ---
 
@@ -101,19 +101,22 @@ YOLOやMobileNetなどの容量の大きいプログラムを書き込む際、�
 書き込み完了後、以下の3つの代表的なプログラムの動作概要と実機デモ動画をご確認いただけます。それぞれオンチップのNPU（Neural Processing Unit）を用いることで、ミリ秒単位の超高速なAI推論処理を実行します。
 
 ### ① YOLO顔検出 NPU高速版 (`tron_yolo_face_npu.srec`)
-* **動作概略**: カメラのリアルタイム動画像から人物の顔を検出し、その位置に緑色のバウンディングボックス（顔枠）を重ね描きします。
+* **動作概略**: カメラのリアルタイム動画像から人物の顔を検し、その位置に緑色のバウンディングボックス（顔枠）を重ね描きします。
 * **特徴**: 通常CPU実行で約2秒（2,090ms）かかる重い推論処理を、 Ethos-U55 NPU へオフロードすることで **約16ms** へと劇的に高速化。60Hzの画面更新を阻害せずに滑らかに追従します。
 * **実機デモ動画**:
-  * [YouTube: High-speed YOLO Face Detection with Ethos-U55 NPU](https://youtu.be/cH7dd1agzxg)
+  [![High-speed YOLO Face Detection with Ethos-U55 NPU](https://img.youtube.com/vi/cH7dd1agzxg/hqdefault.jpg)](https://youtu.be/cH7dd1agzxg)
+  * [YouTubeリンク (https://youtu.be/cH7dd1agzxg)](https://youtu.be/cH7dd1agzxg)
 
 ### ② MobileNet画像分類 NPU高速版 (`tron_img_npu.srec`)
 * **動作概略**: カメラに写った物体の特徴を分析し、それが何であるか（マグカップ、キーボードなど）を推論して、判定されたクラス名と確率（%）を画面にリアルタイム表示します。
 * **特徴**: 通常CPU実行で約1.5秒（1,512ms）要する推論処理を、NPUによって **約17ms** に短縮し、チラつきのない快適な分類処理を実現しています。
 * **実機デモ動画**:
-  * [YouTube: Ethos-U55 NPU Image Processing Demo with RTOS](https://youtu.be/FbrsUrJ6Ovw)
+  [![Ethos-U55 NPU Image Processing Demo with RTOS](https://img.youtube.com/vi/FbrsUrJ6Ovw/hqdefault.jpg)](https://youtu.be/FbrsUrJ6Ovw)
+  * [YouTubeリンク (https://youtu.be/FbrsUrJ6Ovw)](https://youtu.be/FbrsUrJ6Ovw)
 
 ### ③ FOMO基板部品検出 NPU高速版 (`tron_edge_fomo_npu_type.srec`)
 * **動作概略**: 電子基板上の極小の部品（Raspberry Pi Pico、Seeed Studio Xiao、nRF54L15など）をリアルタイムに同時識別し、個数と位置をラベル付きで検出・カウントします。
 * **特徴**: 通常CPUで 278ms かかる推論を、NPUを用いて **約5ms** へと超高速化。複数オブジェクトの瞬間的なカウント追従を実現しています。
 * **実機デモ動画**:
-  * [YouTube: PCB Object Detection using Ethos-U55 NPU](https://youtu.be/_uKRamoLaNA)
+  [![PCB Object Detection using Ethos-U55 NPU](https://img.youtube.com/vi/_uKRamoLaNA/hqdefault.jpg)](https://youtu.be/_uKRamoLaNA)
+  * [YouTubeリンク (https://youtu.be/_uKRamoLaNA)](https://youtu.be/_uKRamoLaNA)
