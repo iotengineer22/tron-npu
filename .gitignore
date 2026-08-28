@@ -30,3 +30,7 @@ Thumbs.db
 **/*.pdr
 **/*.rpd
 **/*.sbd
+
+# Allow debug binaries to be versioned
+!/debug/**/*.elf
+!/debug/**/*.srec
