@@ -501,4 +501,19 @@ YOLOv11nでのAttention問題を回避するため、自己注目モジュール
 * **周辺ペリフェラル制御 (I2C / GLCDC / Dave2D / MIPI-CSI2)**:
   * **[Renesas RA FSP Examples](https://github.com/renesas/ra-fsp-examples)** (GitHub) - `iic_master`, `glcdc`, `drw` (D/AVE 2D), `mipi_csi` サンプルプロジェクトの参照元。
 * **Arm Ethos-U55 NPU AI推論統合**:
-  * **[Renesas FSP (Flexible Software Package)](https://github.com/renesas/fsp)** (GitHub) - Arm Ethos-U55 NPU用ドライバスタック（`r_ethosu`）および TensorFlow Lite Micro 統合の参照元。
+  * **[Renesas FSP (Flexible Software Package)](https://github.com/renesas/fsp)** (GitHub) - Arm Ethos-U55 NPU用ドライバスタック（`r_ethosu`）および TensorFlow Lite Micro 統合の参照元。
+
+---
+
+## 9. ソフトウェアライセンス (Licenses)
+
+本リポジトリに含まれるプログラムおよび学習モデルは、サードパーティ製のソフトウェアを内包しているため、コンポーネントごとに異なるライセンスが適用される**マルチ（ハイブリッド）ライセンス構成**となっております。
+
+* **独自開発アプリケーション部分**: **MIT License**
+* **リアルタイムOS (μT-Kernel 3.0)**: **T-License 2.2** (TRON Forum)
+* **ボードサポートパッケージ (FSP/BSP)**: **Renesas FSP Software License** (ルネサスエレクトロニクス)
+* **Edge Impulse SDK & 各種AI/MLライブラリ**: **Apache License 2.0**
+* **学習用データセット (Roboflow 100)**: **CC BY 4.0** (Creative Commons Attribution 4.0)
+
+> [!IMPORTANT]
+> 各ライセンスの許諾範囲、著作権表示、およびデータセットに関するクレジット表記などの**詳細につきましては、プロジェクトルートディレクトリに配置されている [LICENSE.md](LICENSE.md) ファイルをご参照ください。**
