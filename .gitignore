@@ -34,3 +34,7 @@ Thumbs.db
 # Allow debug binaries to be versioned
 !/debug/**/*.elf
 !/debug/**/*.srec
+
+# Exclude local build copy scripts
+/collect_binaries.py
+/collect_binaries.bat

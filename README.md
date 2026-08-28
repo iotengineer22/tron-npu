@@ -22,16 +22,10 @@ tron-npu/
 │   └── ...                              (比較用のCPU版や各種基礎ファームウェアプロジェクト)
 │
 ├── debug/                               (実機書き込み用ビルド済みバイナリ集約フォルダ)
-│   ├── README.md                        (図解付きのRFP書き込み手順書・マニュアル)
-│   ├── tron_yolo_face_npu.srec          (YOLO顔検出 NPU高速版 SREC)
-│   ├── tron_img_npu.srec                (MobileNet画像分類 NPU高速版 SREC)
-│   ├── tron_edge_fomo_npu_type.srec    (FOMO部品検出 NPU高速版 SREC)
-│   └── ...                              (サブフォルダに各種CPU版や基礎ファームウェアを格納)
 │
 ├── img/                                 (マニュアル・ドキュメント用画像アセットフォルダ)
 │
 ├── LICENSE.md                           (ソフトウェアライセンスおよび引用クレジット表記)
-├── collect_binaries.py / .bat           (最新ビルドバイナリの自動集約スクリプト)
 └── README.md                            (本ドキュメント)
 ```
 
