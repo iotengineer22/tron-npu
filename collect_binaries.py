@@ -16,6 +16,29 @@ PROJECT_MAPPING = {
     "tron_yolo_face_npu": "tron_mipi_test"
 }
 
+def clean_srec(src_path, dst_path):
+    """
+    Reads an S-Record file and writes to dst_path, omitting any lines that write to
+    the Option-Setting Memory (OFS) registers (address prefix 0x02C9) to prevent
+    address errors in Renesas Flash Programmer.
+    """
+    try:
+        with open(src_path, "r") as src, open(dst_path, "w") as dst:
+            skipped_lines = 0
+            for line in src:
+                # S3 records contain 4-byte addresses. Address starts at index 4 (length 8 hex chars).
+                # Check if the address prefix is 02C9 (OFS memory area)
+                if line.startswith("S3") and line[4:8].upper() == "02C9":
+                    skipped_lines += 1
+                    continue
+                dst.write(line)
+        if skipped_lines > 0:
+            print(f"    -> Filtered {skipped_lines} lines of OFS registers (0x02C9xxxx) from SREC.")
+    except Exception as e:
+        print(f"    -> Error cleaning SREC: {e}")
+        # Fallback to standard copy if cleaning fails
+        shutil.copy2(src_path, dst_path)
+
 def main():
     # Root path containing the script
     root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -52,7 +75,12 @@ def main():
                 dst_file_name = f"{proj_dir}{ext}"
                 dst_file_path = os.path.join(debug_dir, dst_file_name)
                 
-                shutil.copy2(src_file_path, dst_file_path)
+                if ext == ".srec":
+                    # Clean OFS registers to prevent RFP E1000008 errors
+                    clean_srec(src_file_path, dst_file_path)
+                else:
+                    shutil.copy2(src_file_path, dst_file_path)
+                
                 print(f"  [{proj_dir}] Copied {src_file_name} -> debug/{dst_file_name}")
                 copied_count += 1
                 found_any = True
