@@ -20,7 +20,7 @@ tron-npu/
 │   ├── tron_img_npu/                    (MobileNet画像分類 NPU高速版)
 │   ├── tron_edge_fomo_npu_type/         (FOMO部品検出 NPU高速版)
 │   └── ...                              (比較用のCPU版や各種基礎ファームウェアプロジェクト)
-
+│
 ├── debug/                               (実機書き込み用ビルド済みバイナリ・手順書)
 ├── img/                                 (マニュアル・ドキュメント用画像アセットフォルダ)
 ├── LICENSE.md                           (ソフトウェアライセンスおよび引用クレジット表記)
