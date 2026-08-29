@@ -3,9 +3,6 @@
 本リポジトリは、ルネサスエレクトロニクス製マイコン **EK-RA8P1**（Cortex-M85 / Ethos-U55 NPU / Dave2D GPU 搭載）と
 リアルタイムOS **μT-Kernel 3.0** を用いた、TRONプログラミングコンテスト2026応募用の開発プロジェクトです。
 
-カメラ入力・画像描画・AI推論を完全に並列化することで、
-超高速かつチラつきのない表示とリアルタイム制御を実現しています。
-
 * **コンテスト公式サイト**: [TRONプログラミングコンテスト2026](https://www.tron.org/ja/programming_contest-2026/)
 
 📄 **[English Version (README_en.md)](README_en.md)**
