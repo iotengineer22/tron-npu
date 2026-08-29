@@ -276,6 +276,8 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
   }
   ```
 
+* **Real-Time Demo Video**: [YouTube Link (https://youtu.be/kwVPgD5SHRA)](https://youtu.be/kwVPgD5SHRA)
+
 ##### LCD Triple-Buffer Verification Demo:
 ![tron_lcd_d1](img/tron_lcd_d1.png)
 ![tron_lcd_d3](img/tron_lcd_d3.png)
@@ -311,6 +313,8 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
               112 << 4, 0 << 4,    // centered screen offsets
               d2_tm_filter);       // bilinear interpolation filter
   ```
+
+* **Real-Time Demo Video**: [YouTube Link (https://youtu.be/Kv0S4wUMbmw)](https://youtu.be/Kv0S4wUMbmw)
 
 ##### Scaled Camera Stream Display Demo:
 ![tron_mipi_2](img/tron_mipi_2.png)
@@ -349,6 +353,8 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
   // Wake up NPU inference task
   tk_wup_tsk(tskid_3);
   ```
+
+* **Real-Time Demo Video**: [YouTube Link (https://youtu.be/FbrsUrJ6Ovw)](https://youtu.be/FbrsUrJ6Ovw)
 
 ##### Image Classification (MobileNet V1) Real-Time Demo:
 ![tron_img7](img/tron_img7.png)
@@ -393,6 +399,8 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
   d2_renderline(d2_handle, x1, y1, x2, y1, border_width, 0); // Render Top border
   ```
 
+* **Real-Time Demo Video**: [YouTube Link (https://youtu.be/cH7dd1agzxg)](https://youtu.be/cH7dd1agzxg)
+
 ##### YOLO Face Detection Real-Time Demo:
 ![tron_face6](img/tron_face6.png)
 ![tron_face7](img/tron_face7.png)
@@ -434,6 +442,8 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
   sprintf(val_str, "%s: %d%%", pcb_class_names[g_ai_detection[i].m_class], g_ai_detection[i].m_val_percent);
   print_bg_font_18(d2_handle, (d2_point)fx, (d2_point)text_y, 1.0f, val_str);
   ```
+
+* **Real-Time Demo Video**: [YouTube Link (https://youtu.be/_uKRamoLaNA)](https://youtu.be/_uKRamoLaNA)
 
 ##### FOMO Component Detection Real-Time Demo:
 ![tron_fomo5](img/tron_fomo5.png)

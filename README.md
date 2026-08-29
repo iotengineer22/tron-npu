@@ -284,6 +284,8 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
   }
   ```
 
+* **実機動作デモ動画**: [YouTubeリンク (https://youtu.be/kwVPgD5SHRA)](https://youtu.be/kwVPgD5SHRA)
+
 ##### LCDトリプルバッファ検証の様子:
 ![tron_lcd_d1](img/tron_lcd_d1.png)
 ![tron_lcd_d3](img/tron_lcd_d3.png)
@@ -320,6 +322,8 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
               112 << 4, 0 << 4,    // 中央寄せ描画オフセット
               d2_tm_filter);       // バイリニアフィルタを適用
   ```
+
+* **実機動作デモ動画**: [YouTubeリンク (https://youtu.be/Kv0S4wUMbmw)](https://youtu.be/Kv0S4wUMbmw)
 
 ##### カメラ映像表示の様子:
 ![tron_mipi_2](img/tron_mipi_2.png)
@@ -358,6 +362,8 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
   // NPU推論タスクの起床
   tk_wup_tsk(tskid_3);
   ```
+
+* **実機動作デモ動画**: [YouTubeリンク (https://youtu.be/FbrsUrJ6Ovw)](https://youtu.be/FbrsUrJ6Ovw)
 
 ##### 画像分類（MobileNet V1）の実機動作写真:
 ![tron_img7](img/tron_img7.png)
@@ -402,6 +408,8 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
   d2_renderline(d2_handle, x1, y1, x2, y1, border_width, 0); // 上線描画
   ```
 
+* **実機動作デモ動画**: [YouTubeリンク (https://youtu.be/cH7dd1agzxg)](https://youtu.be/cH7dd1agzxg)
+
 ##### YOLO顔検出の実機動作写真:
 ![tron_face6](img/tron_face6.png)
 ![tron_face7](img/tron_face7.png)
@@ -445,6 +453,8 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
   sprintf(val_str, "%s: %d%%", pcb_class_names[g_ai_detection[i].m_class], g_ai_detection[i].m_val_percent);
   print_bg_font_18(d2_handle, (d2_point)fx, (d2_point)text_y, 1.0f, val_str);
   ```
+
+* **実機動作デモ動画**: [YouTubeリンク (https://youtu.be/_uKRamoLaNA)](https://youtu.be/_uKRamoLaNA)
 
 ##### FOMO部品検出の実機動作写真:
 ![tron_fomo5](img/tron_fomo5.png)
