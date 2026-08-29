@@ -109,9 +109,6 @@ To objectively evaluate the processing capability of the NPU, **we developed and
 The benchmarks demonstrate that offloading heavy AI inference to the dedicated on-chip NPU accelerator
 achieves dramatic performance improvements compared to CPU-only execution.
 
-By outsourcing inference to the NPU, CPU utilization drops near zero,
-enabling the RTOS task scheduler to maintain strict, deterministic real-time control without display jitter.
-
 * **NPU Acceleration Effects (Actual Benchmarks: CPU-only vs NPU)**:
   * **MobileNet V1 Image Classification**: Reduced latency from 1,512 ms on the CPU to **17 ms (an ~88.9x speedup)**.
   * **YOLO Face Detection**: Reduced latency from 2,090 ms on the CPU to **16 ms (a ~130.6x speedup)**.
