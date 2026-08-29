@@ -42,6 +42,8 @@ This project combines μT-Kernel 3.0's priority-based multi-task scheduling with
 We successfully maintain **fluid display rendering (60 Hz)** while running **background AI inferences (taking only a few milliseconds)**,
 demonstrating a highly practical, low-latency AI edge application.
 
+![Real-time YOLO Face Detection Demo](img/tron_face8.png)
+
 ---
 
 ## 2. Hardware Configuration
