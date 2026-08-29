@@ -55,9 +55,11 @@ demonstrating a highly practical, low-latency AI edge application.
 * **LCD Display**: GLCDC-driven 1024x600 TFT panel (RGB565)
 * **Memory**: External SDRAM (allocated for Triple Framebuffers and tensor arenas)
 
-| Hardware Block Diagram | EK-RA8P1 Evaluation Board |
-| :---: | :---: |
-| ![Hardware Block Diagram](img/Hardware_Block.png) | ![EK-RA8P1 Evaluation Board](img/EK-RA8P1.png) |
+##### Hardware Block Diagram:
+![Hardware Block Diagram](img/Hardware_Block.png)
+
+##### EK-RA8P1 Evaluation Board:
+![EK-RA8P1 Evaluation Board](img/EK-RA8P1.png)
 
 ---
 
@@ -274,9 +276,9 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
   }
   ```
 
-    | LCD Triple-Buffer Verification (1) | LCD Triple-Buffer Verification (2) |
-    | :---: | :---: |
-    | ![tron_lcd_d1](img/tron_lcd_d1.png) | ![tron_lcd_d3](img/tron_lcd_d3.png) |
+##### LCD Triple-Buffer Verification Demo:
+![tron_lcd_d1](img/tron_lcd_d1.png)
+![tron_lcd_d3](img/tron_lcd_d3.png)
 
 * **Serial Print Log**:
   Displays successful SDRAM test results and records the rendering loop flinging bouncing balls aligned with GLCDC refresh ticks:
@@ -310,9 +312,9 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
               d2_tm_filter);       // bilinear interpolation filter
   ```
 
-    | Scaled Camera Stream (1) | Scaled Camera Stream (2) |
-    | :---: | :---: |
-    | ![tron_mipi_2](img/tron_mipi_2.png) | ![tron_mipi_3](img/tron_mipi_3.png) |
+##### Scaled Camera Stream Display Demo:
+![tron_mipi_2](img/tron_mipi_2.png)
+![tron_mipi_3](img/tron_mipi_3.png)
 
 * **Serial Print Log**:
   Indicates camera setup starting capture and looping successfully, querying captured camera frame buffer addresses:
@@ -348,9 +350,9 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
   tk_wup_tsk(tskid_3);
   ```
 
-    | Image Classification (1) | Image Classification (2) |
-    | :---: | :---: |
-    | ![tron_img7](img/tron_img7.png) | ![tron_img8](img/tron_img8.png) |
+##### Image Classification (MobileNet V1) Real-Time Demo:
+![tron_img7](img/tron_img7.png)
+![tron_img8](img/tron_img8.png)
 
 * **Serial Print Log (CPU vs NPU Performance Comparison)**:
   Demonstrates the massive performance boost when offloading the inference from the Cortex-M85 CPU to the hardware NPU accelerator.
@@ -391,9 +393,9 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
   d2_renderline(d2_handle, x1, y1, x2, y1, border_width, 0); // Render Top border
   ```
 
-    | YOLO Face Detection (1) | YOLO Face Detection (2) |
-    | :---: | :---: |
-    | ![tron_face6](img/tron_face6.png) | ![tron_face7](img/tron_face7.png) |
+##### YOLO Face Detection Real-Time Demo:
+![tron_face6](img/tron_face6.png)
+![tron_face7](img/tron_face7.png)
 
 * **Serial Print Log (CPU vs NPU Performance Comparison)**:
   Demonstrates that NPU acceleration cuts down YOLO inference times from **2,090 ms to 16 ms (an ~130.6x speedup)**, allowing real-time bounding box synchronization on the 60 Hz display.
@@ -433,9 +435,9 @@ These baseline projects validate core peripherals (UART, I2C, Dave2D GPU, MIPI-C
   print_bg_font_18(d2_handle, (d2_point)fx, (d2_point)text_y, 1.0f, val_str);
   ```
 
-    | FOMO Component Detection (1) | FOMO Component Detection (2) |
-    | :---: | :---: |
-    | ![tron_fomo5](img/tron_fomo5.png) | ![tron_fomo6](img/tron_fomo6.png) |
+##### FOMO Component Detection Real-Time Demo:
+![tron_fomo5](img/tron_fomo5.png)
+![tron_fomo6](img/tron_fomo6.png)
 
 * **Serial Print Log (CPU vs NPU Performance Comparison)**:
   Demonstrates that NPU acceleration cuts down FOMO inference times from **278 ms to 5 ms (a ~55.6x speedup)**, ensuring instant target counts.

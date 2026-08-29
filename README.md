@@ -56,9 +56,11 @@ tron-npu/
 * **液晶表示**: GLCDC制御 1024x600 TFTカラー液晶パネル
 * **外部メモリ**: SDRAM 32MB（トリプルバッファおよびNPUテンソル領域に使用）
 
-| ハードウェア・ブロック構成 | EK-RA8P1 評価ボード外観 |
-| :---: | :---: |
-| ![Hardware Block Diagram](img/Hardware_Block.png) | ![EK-RA8P1 評価ボード](img/EK-RA8P1.png) |
+##### ハードウェア・ブロック構成:
+![Hardware Block Diagram](img/Hardware_Block.png)
+
+##### EK-RA8P1 評価ボード外観:
+![EK-RA8P1 評価ボード](img/EK-RA8P1.png)
 
 
 
@@ -282,9 +284,9 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
   }
   ```
 
-    | LCDトリプルバッファ検証(1) | LCDトリプルバッファ検証(2) |
-    | :---: | :---: |
-    | ![tron_lcd_d1](img/tron_lcd_d1.png) | ![tron_lcd_d3](img/tron_lcd_d3.png) |
+##### LCDトリプルバッファ検証の様子:
+![tron_lcd_d1](img/tron_lcd_d1.png)
+![tron_lcd_d3](img/tron_lcd_d3.png)
 
 * **実行時の出力ログ**:
   外部物理メモリ（SDRAM）への書き込み検証テストが成功し、Dave2D GPUによる描画ループが液晶のリフレッシュ割り込み（Vblank IRQs）に完全に追従してフリップしていることを確認しました。
@@ -319,9 +321,9 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
               d2_tm_filter);       // バイリニアフィルタを適用
   ```
 
-    | カメラ表示(1) | カメラ表示(2) |
-    | :---: | :---: |
-    | ![tron_mipi_2](img/tron_mipi_2.png) | ![tron_mipi_3](img/tron_mipi_3.png) |
+##### カメラ映像表示の様子:
+![tron_mipi_2](img/tron_mipi_2.png)
+![tron_mipi_3](img/tron_mipi_3.png)
 
 * **実行時の出力ログ**:
   MIPIカメラドライバおよびGLCDC表示が正常にリンクされ、カメラがキャプチャした最新の画像バッファアドレス（`0x90280000`）から液晶画面へ同期コピーを正常に繰り返しているログ出力を示しています。
@@ -357,9 +359,9 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
   tk_wup_tsk(tskid_3);
   ```
 
-    | 画像分類(1) | 画像分類(2) |
-    | :---: | :---: |
-    | ![tron_img7](img/tron_img7.png) | ![tron_img8](img/tron_img8.png) |
+##### 画像分類（MobileNet V1）の実機動作写真:
+![tron_img7](img/tron_img7.png)
+![tron_img8](img/tron_img8.png)
 
 * **実行時の出力ログ (CPU実行 vs NPU実行 of 比較)**:
   マイコン内蔵 of 専用アクセラレータ（NPU）を有効化した高速版と、Cortex-M85 CPU単体で処理を行うCPU通常版の比較ログです。
@@ -400,9 +402,9 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
   d2_renderline(d2_handle, x1, y1, x2, y1, border_width, 0); // 上線描画
   ```
 
-    | YOLO顔検出(1) | YOLO顔検出(2) |
-    | :---: | :---: |
-    | ![tron_face6](img/tron_face6.png) | ![tron_face7](img/tron_face7.png) |
+##### YOLO顔検出の実機動作写真:
+![tron_face6](img/tron_face6.png)
+![tron_face7](img/tron_face7.png)
 
 * **実行時の出力ログ (CPU実行 vs NPU実行の比較)**:
   NPU高速版とCPU通常版の比較ログです。
@@ -444,9 +446,9 @@ RTOSマルチタスクの基本スケジューリング、シリアル出力、I
   print_bg_font_18(d2_handle, (d2_point)fx, (d2_point)text_y, 1.0f, val_str);
   ```
 
-    | FOMO部品検出(1) | FOMO部品検出(2) |
-    | :---: | :---: |
-    | ![tron_fomo5](img/tron_fomo5.png) | ![tron_fomo6](img/tron_fomo6.png) |
+##### FOMO部品検出の実機動作写真:
+![tron_fomo5](img/tron_fomo5.png)
+![tron_fomo6](img/tron_fomo6.png)
 
 * **実行時の出力ログ (CPU実行 vs NPU実行の比較)**:
   NPU高速版とCPU通常版の比較ログです。
