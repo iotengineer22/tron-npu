@@ -526,6 +526,7 @@ YOLOv11nでのAttention問題を回避するため、自己注目モジュール
   * **[Renesas RA FSP Examples](https://github.com/renesas/ra-fsp-examples)** (GitHub) - `iic_master`, `glcdc`, `drw` (D/AVE 2D), `mipi_csi` サンプルプロジェクトの参照元。
 * **Arm Ethos-U55 NPU AI推論統合**:
   * **[Renesas FSP (Flexible Software Package)](https://github.com/renesas/fsp)** (GitHub) - Arm Ethos-U55 NPU用ドライバスタック（`r_ethosu`）および TensorFlow Lite Micro 統合の参照元。
+  * **[Renesas RUHMI Framework MCU](https://github.com/renesas/ruhmi-framework-mcu)** (GitHub) - Renesas MCU 向け Ethos-U 推論フレームワークの統合・実装パターンの参照元。
 
 ---
 

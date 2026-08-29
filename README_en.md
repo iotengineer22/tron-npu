@@ -514,6 +514,7 @@ This project references and utilizes the following official sample codes and rep
   * **[Renesas RA FSP Examples](https://github.com/renesas/ra-fsp-examples)** (GitHub) - Reference projects for `iic_master`, `glcdc`, `drw` (D/AVE 2D), and `mipi_csi` camera integration.
 * **Arm Ethos-U55 NPU AI Inference Integration**:
   * **[Renesas FSP (Flexible Software Package)](https://github.com/renesas/fsp)** (GitHub) - Driver stack (`r_ethosu`) and TensorFlow Lite Micro integration guides for the Arm Ethos-U55 NPU.
+  * **[Renesas RUHMI Framework MCU](https://github.com/renesas/ruhmi-framework-mcu)** (GitHub) - Reference implementation patterns for integrating the Ethos-U software stack on Renesas MCUs.
 
 ---
 
