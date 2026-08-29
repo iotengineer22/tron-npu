@@ -524,7 +524,7 @@ This repository contains components governed by multiple licenses (hybrid licens
 * **Custom Application Code**: **MIT License**
 * **Real-Time OS (μT-Kernel 3.0)**: **T-License 2.2** (TRON Forum)
 * **Board Support Package (FSP/BSP)**: **Renesas FSP Software License** (Renesas Electronics)
-* **Edge Impulse SDK & AI/ML Libraries**: **Apache License 2.0**
+* **Edge Impulse SDK Core**: **BSD 3-Clause Clear** (Third-party libraries include Apache 2.0 / BSD-3-Clause)
 * **Training Dataset (Roboflow 100)**: **CC BY 4.0** (Creative Commons Attribution 4.0)
 
 > [!IMPORTANT]

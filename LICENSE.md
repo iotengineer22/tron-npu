@@ -41,9 +41,12 @@ SOFTWARE.
 
 
 ## 4. Edge Impulse SDK & Machine Learning Libraries (Google / Arm / Edge Impulse)
-TensorFlow Lite Micro、CMSIS ライブラリ、および Edge Impulse からエクスポートされた SDK コードには、**Apache License 2.0** が適用されます。
+Edge Impulse からエクスポートされた C++ Inferencing SDK コアコードには **BSD 3-Clause Clear** が適用されます。
+なお、TensorFlow Lite Micro および CMSIS ライブラリには、**Apache License 2.0** が適用されます。
 * **著作権者**: Google LLC / Arm Limited / Edge Impulse Inc.
-* **ライセンス詳細**: Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+* **ライセンス詳細**: 
+  - Edge Impulse SDK: BSD 3-Clause Clear License (https://github.com/edgeimpulse/inferencing-sdk-cpp/blob/master/LICENSE)
+  - TensorFlow Lite Micro / CMSIS: Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 
 ## 5. データセット・クレジット (Dataset Attribution)
