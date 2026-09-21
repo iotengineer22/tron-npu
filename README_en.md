@@ -10,12 +10,25 @@ and the **μT-Kernel 3.0** real-time OS.
 
 ---
 
+## Presentation Materials (Slides / PDF)
+
+Presentation slides detailing the project overview, system architecture, hardware benchmark results, and demo video highlights for each AI model (YOLO face detection, FOMO object detection, MobileNet image classification) are available in the `slide/` directory.
+
+* 📊 **PowerPoint**: [`slide/202609_tron_npu.pptx`](slide/202609_tron_npu.pptx)
+* 📄 **PDF Document**: [`slide/202609_tron_npu.pdf`](slide/202609_tron_npu.pdf)
+
+---
+
 ## Repository Directory Layout
 
 The repository is organized into the following structure:
 
 ```text
 tron-npu/
+├── slide/                               (Project presentation slides)
+│   ├── 202609_tron_npu.pptx             (PowerPoint presentation)
+│   └── 202609_tron_npu.pdf              (PDF document)
+│
 ├── src/                                 (Source code & e2 studio project folders)
 │   ├── tron_yolo_face_npu/              (YOLO Face Detection - NPU High-Speed Version)
 │   ├── tron_img_npu/                    (MobileNet Image Classification - NPU High-Speed Version)

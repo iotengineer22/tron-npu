@@ -9,12 +9,25 @@
 
 ---
 
+## 紹介資料 (スライド / PDF)
+
+本プロジェクトのシステム概要、アーキテクチャ設計、実機ベンチマーク結果、および各AIモデル（YOLO顔検出、FOMO物体認識、MobileNet画像分類）の動作デモ動画をまとめたプレゼンテーション資料（PowerPoint / PDF）を `slide/` フォルダに収録しています。
+
+* 📊 **PowerPoint版**: [`slide/202609_tron_npu.pptx`](slide/202609_tron_npu.pptx)
+* 📄 **PDF版**: [`slide/202609_tron_npu.pdf`](slide/202609_tron_npu.pdf)
+
+---
+
 ## リポジトリのフォルダ構成
 
 本リポジトリは、以下のような構成でソースコードや書き込み用のバイナリが整理されています。
 
 ```text
 tron-npu/
+├── slide/                               (プロジェクト紹介プレゼンテーション資料)
+│   ├── 202609_tron_npu.pptx             (PowerPointスライド)
+│   └── 202609_tron_npu.pdf              (PDF版スライド)
+│
 ├── src/                                 (開発ソースコード・e2 studioプロジェクトフォルダ)
 │   ├── tron_yolo_face_npu/              (YOLO顔検出 NPU高速版)
 │   ├── tron_img_npu/                    (MobileNet画像分類 NPU高速版)
